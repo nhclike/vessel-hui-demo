@@ -68,5 +68,12 @@ export default [
     menuCode: '001',
     breadcrumb: [],
     component: 'HiMAP'
+  },
+  {
+    name: 'TimeLine',
+    path: '/TimeLine',
+    menuCode: '001',
+    breadcrumb: [],
+    component: 'TimeLine'
   }
 ]

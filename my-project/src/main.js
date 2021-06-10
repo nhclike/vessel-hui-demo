@@ -6,16 +6,18 @@ import initApp from './initApp'
 import '@hui/svg-icon/lib/svg-icon.css'
 import icons from '@hui/svg-icon'
 import './svg-symbol-icon.js'
+import himapvue from 'hi-map-vue/lib/index.umd.min'
+import 'hi-map-vue/lib/index.css'
+import vuetimeline from '@growthbunker/vuetimeline'
 
 for (const icon of icons) {
   Vue.component(icon.name, icon)
 }
 
 Vue.use(hui)
-import himapvue from 'hi-map-vue/lib/index.umd.min';
-import 'hi-map-vue/lib/index.css';
 
-Vue.use(himapvue);
+Vue.use(vuetimeline)
+Vue.use(himapvue)
 // 全局混合，对面包屑的多语言进行处理
 Vue.mixin({
   computed: {

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@conch/svg-symbol-icon": "^0.2.10",
+    "@growthbunker/vuetimeline": "^0.1.17",
     "@hui-icon-sets/hui": "^0.3.0",
     "@hui-pro/empty": "^1.18.0",
     "@hui-pro/layout": "^2.0.0-alpha.6",

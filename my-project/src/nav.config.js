@@ -41,6 +41,13 @@ export default [
     isApp: true
   },
   {
+    router: '/TimeLine',
+    menuCode: '001',
+    title: '时间轴',
+    icon: 'h-icon-menu_app',
+    isApp: true
+  },
+  {
     menuCode: '001',
     title: 'HuiPro',
     icon: 'h-icon-menu_app',
