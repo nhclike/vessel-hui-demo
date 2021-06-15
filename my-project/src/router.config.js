@@ -75,5 +75,12 @@ export default [
     menuCode: '001',
     breadcrumb: [],
     component: 'TimeLine'
+  },
+  {
+    name: 'Train',
+    path: '/Train',
+    menuCode: '001',
+    breadcrumb: [],
+    component: 'Train'
   }
 ]

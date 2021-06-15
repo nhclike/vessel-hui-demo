@@ -48,6 +48,13 @@ export default [
     isApp: true
   },
   {
+    router: '/Train',
+    menuCode: '001',
+    title: '火车',
+    icon: 'h-icon-menu_app',
+    isApp: true
+  },
+  {
     menuCode: '001',
     title: 'HuiPro',
     icon: 'h-icon-menu_app',
