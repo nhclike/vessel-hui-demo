@@ -81,6 +81,6 @@ export default [
     path: '/Train',
     menuCode: '001',
     breadcrumb: [],
-    component: 'Train'
+    component: 'TrainBox'
   }
 ]

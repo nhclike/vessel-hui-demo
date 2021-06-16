@@ -1,9 +1,6 @@
 <template>
-  <div class="container">
-    <div>
-      <button @click="toLeft">正向</button>
-      <button @click="toRight">反向</button>
-    </div>
+  <div>
+
     <div class="train-box">
       <div class="train-top" :class="{
         'f-left':trainDirection===0,
@@ -11,9 +8,9 @@
       }">
         火车头
       </div>
-      <div class="train-body">
-        <div class="train-list-box" ref="trainListBox">
-          <ul class="train-list" :class="{
+      <div class="train-body" ref="trainBody">
+        <div class="train-list-box" ref="trainListBox" @scroll="handleScroll">
+          <ul class="train-list" ref="trainList" :class="{
             'flex-row':trainDirection===0,
             'flex-row-reverse':trainDirection===1
             }">
@@ -75,123 +72,58 @@ export default {
     trainDirection: {
       type: Number,
       default: 0// 0正向从右向左/1反向从左到右
+    },
+    trainListData: {
+      type: Array,
+      default: () => {
+        return []
+      }
     }
   },
   data () {
     return {
-      trainListData: [
-
-      ],
       lastBlockBoxStyle: {
         paddingLeft: '200px'
-      }
+      },
+      scrollLeft: 0
+
     }
   },
   computed: {
-
+    curActiveTrainIndex () {
+      let index = 0
+      if (this.trainDirection === 0) {
+        index = Math.floor(this.scrollLeft / 280)
+      } else {
+        index = Math.floor(Math.abs(this.scrollLeft + this.$refs.trainBody.clientWidth - this.$refs.trainListBox.scrollWidth) / 280)
+      }
+      return index
+    }
+  },
+  watch: {
+    curActiveTrainIndex (newVal, oldVal) {
+      console.log(newVal, oldVal)
+      this.$emit('emitCurActiveTrainIndex', newVal)
+    }
   },
   mounted () {
     // console.log(this.$refs.trainOptBox, this.$refs.trainOptBox.clientWidth)
     this.lastBlockBoxStyle = {
       paddingLeft: this.$refs.trainListBox.clientWidth - this.$refs.trainOptBox.clientWidth + 'px'
     }
-    this.trainListData = [{
-      type: '1',
-      name: '第1节平车',
-      box: [
-        {
-          name: '第1集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    },
-    {
-      type: '2',
-      name: '第2节棚车',
-      box: [
-        {
-          name: '第2集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    },
-    {
-      type: '2',
-      name: '第3节棚车',
-      box: [
-        {
-          name: '第3集装箱'
-        },
-        {
-          name: '第4集装箱'
-        }
-      ]
-    },
-    {
-      type: '3',
-      name: '第4节敞车',
-      box: [
-        {
-          name: '第5集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    },
-    {
-      type: '3',
-      name: '第4节敞车',
-      box: [
-        {
-          name: '第6集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    },
-    {
-      type: '2',
-      name: '第5节棚车',
-      box: [
-        {
-          name: '第7集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    },
-    {
-      type: '1',
-      name: '第6节车厢',
-      box: [
-        {
-          name: '第8集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
-    }]
   },
   methods: {
-    toLeft () {
-      this.trainDirection = 0
-    },
-    toRight () {
-      this.trainDirection = 1
+    handleScroll () {
+      console.log(this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
+      this.scrollLeft = this.$refs.trainListBox.scrollLeft
     }
   }
 }
 </script>
 
 <style scoped lang="less">
+@train-box-width:200px;
+@train-box-add-width:80px;
 .train-box{
   height: 310px;
   width:1200px;
@@ -234,9 +166,9 @@ export default {
       .flex-row{
         flex-direction: row;
         .train-item-box{
-          padding-right: 80px;
+          padding-right: @train-box-add-width;
           &:first-child{
-            padding-left: 80px;
+            padding-left: @train-box-add-width;
           }
 
         }
@@ -244,9 +176,9 @@ export default {
       .flex-row-reverse{
         flex-direction: row-reverse;
         .train-item-box{
-          padding-left: 80px;
+          padding-left: @train-box-add-width;
           &:first-child{
-            padding-right: 80px;
+            padding-right: @train-box-add-width;
           }
 
         }
@@ -272,7 +204,7 @@ export default {
         display: flex;
         justify-content: space-between;
         .add-carriage-item{
-          height: 80px;
+          height: @train-box-add-width;
           width: 60px;
           background: #ddd;
         }
@@ -286,29 +218,24 @@ export default {
         justify-content: space-between;
         .add-train-item{
           background: #fff;
-          height: 80px;
+          height:@train-box-add-width;
           width: 60px;
         }
       }
     }
-    .p-right{
-      padding-right: 80px;
-    }
-    .p-left{
-      padding-left: 80px;
-    }
+
     .train-item-box{
       border: 2px solid #fff;
       // padding-right:80px;
 
       .train-item-wrapper{
-        height: 200px;
-        width: 200px;
+        height: @train-box-width;
+        width: @train-box-width;
         border: 2px solid red;
         // margin: 0 20px;
         .carriage-box{
           border: 2px solid #000;
-          height: 80px;
+          height: 70px;
           display: flex;
           align-items: center;
           .carriage-item{

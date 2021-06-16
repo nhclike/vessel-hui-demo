@@ -6,7 +6,7 @@ export default {
     // userInfo模拟数据，真实开发环境中可以去掉，使用接口获取
     const data = {
       languageId: 'zh_CN',
-      skin: 'blue',
+      skin: 'redblack',
       breadcrumb: {
         '001': ['欢迎']
       },
