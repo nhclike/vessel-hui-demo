@@ -4,9 +4,19 @@
       <el-button type="primary" @click="toLeft">正向</el-button>
       <el-button type="primary" @click="toRight">反向</el-button>
       <span>当前激活第{{ curActiveTrainIndex+1}}车厢</span>
+      <el-row>
+        <el-col :span="12">
+          <div>
+            指定激活第
+            <el-input v-model="needActiveTrainIndex" type="Number"/>
+            车厢
+          </div>
+        </el-col>
+      </el-row>
+
     </div>
     <div v-if="trainListData.length>0">
-      <Train :trainDirection="trainDirection" :trainListData="trainListData" @emitCurActiveTrainIndex="emitCurActiveTrainIndex" ref="trainBox"></Train>
+      <Train :trainDirection="trainDirection" :trainListData="trainListData" :needActiveTrainIndex="Number(needActiveTrainIndex-1)" @emitCurActiveTrainIndex="emitCurActiveTrainIndex" ref="trainBox"></Train>
 
     </div>
   </div>
@@ -19,7 +29,8 @@ export default {
     return {
       trainDirection: 0,
       trainListData: [],
-      curActiveTrainIndex: 0
+      curActiveTrainIndex: 0,
+      needActiveTrainIndex: 1
     }
   },
   components: {

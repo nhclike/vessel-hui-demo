@@ -78,6 +78,11 @@ export default {
       default: () => {
         return []
       }
+    },
+    // 需要激活的火车车厢
+    needActiveTrainIndex: {
+      type: Number,
+      default: 0
     }
   },
   data () {
@@ -104,6 +109,15 @@ export default {
     curActiveTrainIndex (newVal, oldVal) {
       console.log(newVal, oldVal)
       this.$emit('emitCurActiveTrainIndex', newVal)
+    },
+    needActiveTrainIndex (newVal, oldVal) {
+      if (newVal !== this.curActiveTrainIndex) {
+        if (this.trainDirection === 0) {
+          this.$refs.trainListBox.scrollLeft = newVal * 280
+        } else {
+          this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - newVal * 280
+        }
+      }
     }
   },
   mounted () {
@@ -225,7 +239,7 @@ export default {
     }
 
     .train-item-box{
-      border: 2px solid #fff;
+      // border: 2px solid #fff;
       // padding-right:80px;
 
       .train-item-wrapper{
