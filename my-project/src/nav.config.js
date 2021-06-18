@@ -81,6 +81,12 @@ export default [
         isApp: true
       }
     ]
+  },
+  {
+    router: '/TableWithImg',
+    menuCode: '001',
+    title: '表格图片查看',
+    icon: 'h-icon-menu_app',
+    isApp: true
   }
-
 ]

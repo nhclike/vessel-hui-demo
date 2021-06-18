@@ -82,5 +82,12 @@ export default [
     menuCode: '001',
     breadcrumb: [],
     component: 'TrainBox'
+  },
+  {
+    name: 'TableWithImg',
+    path: '/TableWithImg',
+    menuCode: '001',
+    breadcrumb: [],
+    component: 'tableWithimg/TableWithImg'
   }
 ]

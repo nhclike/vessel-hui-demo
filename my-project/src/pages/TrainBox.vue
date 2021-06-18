@@ -69,33 +69,19 @@ export default {
     {
       type: 'P70',
       name: '第2节棚车',
-      box: [
-        {
-          name: '第2集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
+      box: []
     },
     {
       type: 'P70',
       name: '第3节棚车',
-      box: [
-        {
-          name: '第3集装箱'
-        },
-        {
-          name: '第4集装箱'
-        }
-      ]
+      box: []
     },
     {
       type: 'C70',
       name: '第4节敞车',
       box: [
         {
-          name: '第5集装箱'
+          name: '第2集装箱'
         },
         {
           name: ''
@@ -107,7 +93,7 @@ export default {
       name: '第5节敞车',
       box: [
         {
-          name: '第6集装箱'
+          name: '第3集装箱'
         },
         {
           name: ''
@@ -117,21 +103,14 @@ export default {
     {
       type: 'P70',
       name: '第6节棚车',
-      box: [
-        {
-          name: '第7集装箱'
-        },
-        {
-          name: ''
-        }
-      ]
+      box: []
     },
     {
       type: 'NX70',
       name: '第7节平车',
       box: [
         {
-          name: '第8集装箱'
+          name: '第4集装箱'
         },
         {
           name: ''
