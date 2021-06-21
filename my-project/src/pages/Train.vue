@@ -30,13 +30,21 @@
                         <i class="h-icon-edit"></i>
                         <i class="h-icon-delete"></i>
                       </template>
-
                   </div>
                 </div>
                 <div class="train-item-content">
-                  <span>{{item.name}}</span>
+                  <div class="train-item-name">
+                    <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.name}}</span>
+                    <input v-focus="true"
+                      v-if="index===curActiveTrainIndex&&item.isEdit"
+                      ref="inputList"
+                      @blur="fnInputBlur(item)"
+                      type="text"
+                      v-model="item.name">
+                  </div>
+
                   <template v-if="index===curActiveTrainIndex">
-                    <i class="h-icon-edit"></i>
+                    <i class="h-icon-edit" @click="editTrainBox(item,index)"></i>
                     <i class="h-icon-delete" @click="deleteTrainBox(index)"></i>
                   </template>
 
@@ -108,7 +116,8 @@ export default {
       lastBlockBoxStyle: {
         paddingLeft: '200px'
       },
-      scrollLeft: 0
+      scrollLeft: 0,
+      isEditTrainBox: false
 
     }
   },
@@ -144,6 +153,14 @@ export default {
       paddingLeft: this.$refs.trainListBox.clientWidth - this.$refs.trainOptBox.clientWidth + 'px'
     }
   },
+  directives: {
+    focus: {
+    // 指令的定义
+      inserted: function (el) {
+        el.focus()
+      }
+    }
+  },
   methods: {
     handleScroll () {
       console.log(this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
@@ -151,6 +168,13 @@ export default {
     },
     addTrainBox (isPrev) {
       this.$emit('emitAddTrainBox', isPrev)
+    },
+    fnInputBlur (item) {
+      console.log(item)
+      item.isEdit = false
+    },
+    editTrainBox (item, index) {
+      item.isEdit = true
     },
     deleteTrainBox (index) {
       this.$confirm('此操作将永久删除该车厢, 是否继续?', {
@@ -251,8 +275,8 @@ export default {
       }
       .add-carriage-box{
         width: 100%;
-        height: 60px;
-        border: 1px solid #000;
+        height:80px;
+        // border: 1px solid #000;
         display: flex;
         justify-content: space-between;
         position: relative;
@@ -317,13 +341,31 @@ export default {
             background: green;
             color: #000;
             width: 50%;
-            height: 40px;
+            height: 60px;
+            i{
+              font-size: 24px;
+            }
           }
         }
         .train-item-content{
           height: 100px;
           width: 100%;
           color: #000;
+          i{
+            font-size: 30px;
+          }
+          .train-item-name{
+            span{
+              min-width: 60px;
+              display: inline-block;
+              height: 30px;
+            }
+            input{
+              min-width: 60px;
+              display: inline-block;
+              height: 30px;
+            }
+          }
         }
       }
     }

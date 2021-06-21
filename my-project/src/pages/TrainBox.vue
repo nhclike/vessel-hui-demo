@@ -44,6 +44,11 @@
 
 <script>
 import Train from './Train.vue'
+// const trainType = {
+//   NX70: '平车',
+//   P70: '平车',
+//   C70: '敞车'
+// }
 export default {
   data () {
     return {
@@ -64,6 +69,7 @@ export default {
     this.trainListData = [{
       type: 'NX70',
       name: '第1节平车',
+      isEdit: false,
       box: [
         {
           name: '第1集装箱'
@@ -76,16 +82,19 @@ export default {
     {
       type: 'P70',
       name: '第2节棚车',
+      isEdit: false,
       box: []
     },
     {
       type: 'P70',
       name: '第3节棚车',
+      isEdit: false,
       box: []
     },
     {
       type: 'C70',
       name: '第4节敞车',
+      isEdit: false,
       box: [
         {
           name: '第2集装箱'
@@ -98,6 +107,7 @@ export default {
     {
       type: 'C70',
       name: '第5节敞车',
+      isEdit: false,
       box: [
         {
           name: '第3集装箱'
@@ -110,11 +120,13 @@ export default {
     {
       type: 'P70',
       name: '第6节棚车',
+      isEdit: false,
       box: []
     },
     {
       type: 'NX70',
       name: '第7节平车',
+      isEdit: false,
       box: [
         {
           name: '第4集装箱'
@@ -153,13 +165,15 @@ export default {
         const addIndex = this.curActiveTrainIndex
         this.trainListData.splice(addIndex, 0, {
           type: this.trainType,
-          name: ''
+          name: '',
+          isEdit: false
         })
       } else {
         const addIndex1 = this.curActiveTrainIndex + 1
         this.trainListData.splice(addIndex1, 0, {
           type: this.trainType,
-          name: ''
+          name: '',
+          isEdit: false
         })
       }
       this.trainTypeDialogVisible = false
