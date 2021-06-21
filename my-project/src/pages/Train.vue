@@ -9,20 +9,37 @@
         火车头
       </div>
       <div class="train-body" ref="trainBody">
-        <div class="train-list-box" ref="trainListBox" @scroll="handleScroll">
-          <ul class="train-list" ref="trainList" :class="{
+        <div class="train-list-box" ref="trainListBox" @scroll="handleScroll" >
+          <ul class="train-list" ref="trainList"
+
+           :class="{
             'flex-row':trainDirection===0,
             'flex-row-reverse':trainDirection===1
             }">
-            <li class="train-item-box" v-for="(item,index) in trainListData" :key="index">
-              <div class="train-item-wrapper">
+            <li class="train-item-box" :class="{
+              'C70':item.type==='C70',
+              'NX70':item.type==='NX70',
+              'P70':item.type==='P70'
+
+            }" v-for="(item,index) in trainListData" :key="index">
+              <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}">
                 <div class="carriage-box">
-                  <div class="carriage-item" v-for="(cItem,index) in item.box" :key="index">
-                      {{cItem.name}}
+                  <div class="carriage-item" v-for="(cItem,cIndex) in item.box" :key="cIndex">
+                      <span v-if="item&&item.name">{{cItem.name}}</span>
+                      <template v-if="index===curActiveTrainIndex">
+                        <i class="h-icon-edit"></i>
+                        <i class="h-icon-delete"></i>
+                      </template>
+
                   </div>
                 </div>
                 <div class="train-item-content">
-                  {{item.name}}
+                  <span>{{item.name}}</span>
+                  <template v-if="index===curActiveTrainIndex">
+                    <i class="h-icon-edit"></i>
+                    <i class="h-icon-delete" @click="deleteTrainBox(index)"></i>
+                  </template>
+
                 </div>
               </div>
             </li>
@@ -32,7 +49,8 @@
           </ul>
         </div>
 
-        <div class="train-opt-box" ref="trainOptBox" :class="{
+        <div class="train-opt-box" ref="trainOptBox"
+         :class="{
           'f-left':trainDirection===0,
           'f-right':trainDirection===1
         }">
@@ -51,10 +69,10 @@
           'add-flex-row':trainDirection===0,
           'add-flex-row-reverse':trainDirection===1
         }">
-          <div class="add-train-item">
+          <div class="add-train-item" @click="addTrainBox(true)">
             向前添加火车
           </div>
-          <div class="add-train-item">
+          <div class="add-train-item"  @click="addTrainBox(false)">
             向后添加火车
           </div>
         </div>
@@ -130,6 +148,28 @@ export default {
     handleScroll () {
       console.log(this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
       this.scrollLeft = this.$refs.trainListBox.scrollLeft
+    },
+    addTrainBox (isPrev) {
+      this.$emit('emitAddTrainBox', isPrev)
+    },
+    deleteTrainBox (index) {
+      this.$confirm('此操作将永久删除该车厢, 是否继续?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        onConfirm: () => {
+          this.$emit('emitDeleteTrainBox', index)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        },
+        onCancel: () => {
+          this.$message({
+            type: 'success',
+            message: '已取消删除!'
+          })
+        }
+      })
     }
   }
 }
@@ -146,7 +186,7 @@ export default {
     float: left;
     width: 300px;
     height:100%;
-    background: red;
+    background: #ddd;
     color: #fff;
   }
   .f-left{
@@ -157,7 +197,7 @@ export default {
   }
   .train-body{
     float: left;
-    background: yellow;
+    background: #999;
     height: 100%;
     width: calc(~"100% - 300px");
     // overflow: auto;
@@ -170,7 +210,6 @@ export default {
       width: 100%;
       height: 100%;
       overflow: auto;
-      z-index: 0;
       .train-list{
         display: inline-flex;
         // align-items: center;
@@ -181,6 +220,7 @@ export default {
         flex-direction: row;
         .train-item-box{
           padding-right: @train-box-add-width;
+
           &:first-child{
             padding-left: @train-box-add-width;
           }
@@ -199,12 +239,10 @@ export default {
       }
     }
     .train-opt-box{
-      // float: left;
       width: 360px;
       height: calc(~"100% - 30px");
-      border: 1px solid red;
+      // border: 1px solid red;
       position: relative;
-      z-index: 999;
       .add-flex-row{
         flex-direction: row;
       }
@@ -213,40 +251,62 @@ export default {
       }
       .add-carriage-box{
         width: 100%;
-        height: 100px;
+        height: 60px;
         border: 1px solid #000;
         display: flex;
         justify-content: space-between;
+        position: relative;
         .add-carriage-item{
-          height: @train-box-add-width;
-          width: 60px;
+          height: 40px;
+          width: @train-box-add-width;
           background: #ddd;
+           position: relative;
+          z-index: 1999;
         }
 
       }
       .add-train-box{
         height: calc(~ "100% - 100px");
         width: 100%;
-        border: 1px solid red;
+        // border: 1px solid red;
         display: flex;
         justify-content: space-between;
         .add-train-item{
-          background: #fff;
-          height:@train-box-add-width;
-          width: 60px;
+          background: #f5f5f5;
+          height:80px;
+          width: @train-box-add-width;
+          position: relative;
+          z-index: 1999;
         }
       }
     }
 
     .train-item-box{
-      // border: 2px solid #fff;
-      // padding-right:80px;
+      &.P70{
+        .train-item-content{
+          background: rgb(231, 106, 175) !important;
+        }
+      }
 
+       &.NX70{
+        .train-item-content{
+          background: rgb(227, 241, 195) !important;
+        }
+      }
+      &.C70{
+        .train-item-content{
+          background: rgb(136, 136, 228) !important;
+        }
+      }
       .train-item-wrapper{
         height: @train-box-width;
         width: @train-box-width;
-        border: 2px solid red;
-        // margin: 0 20px;
+        &.curTop{
+          position: relative;
+          z-index: 1999;
+          border: 1px solid red;
+        }
+        // border: 2px solid red;
         .carriage-box{
           border: 2px solid #000;
           height: 70px;
@@ -255,7 +315,7 @@ export default {
           .carriage-item{
             border: 1px solid #000;
             background: green;
-            color: #fff;
+            color: #000;
             width: 50%;
             height: 40px;
           }
@@ -263,8 +323,7 @@ export default {
         .train-item-content{
           height: 100px;
           width: 100%;
-          background: blue;
-          color: #ffff;
+          color: #000;
         }
       }
     }

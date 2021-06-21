@@ -16,9 +16,29 @@
 
     </div>
     <div v-if="trainListData.length>0">
-      <Train :trainDirection="trainDirection" :trainListData="trainListData" :needActiveTrainIndex="Number(needActiveTrainIndex-1)" @emitCurActiveTrainIndex="emitCurActiveTrainIndex" ref="trainBox"></Train>
+      <Train
+      :trainDirection="trainDirection"
+      :trainListData="trainListData"
+      :needActiveTrainIndex="needActiveTrainIndex"
+       @emitCurActiveTrainIndex="emitCurActiveTrainIndex"
+       @emitAddTrainBox="emitAddTrainBox"
+       @emitDeleteTrainBox="emitDeleteTrainBox"
+       ref="trainBox">
+       </Train>
 
     </div>
+     <el-dialog title="选择火车类型" :visible.sync="trainTypeDialogVisible" :area="[480,300]">
+      请选择火车类型
+      <el-radio-group v-model="trainType">
+        <el-radio label="NX70">平车</el-radio>
+        <el-radio label="P70">棚车</el-radio>
+        <el-radio label="C70">敞车</el-radio>
+      </el-radio-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="sureAddTrainBox">确 定</el-button>
+        <el-button @click="trainTypeDialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -30,28 +50,15 @@ export default {
       trainDirection: 0,
       trainListData: [],
       curActiveTrainIndex: 0,
-      needActiveTrainIndex: 1
+      needActiveTrainIndex: 0,
+      trainType: 'NX70',
+      trainTypeDialogVisible: false,
+      isTrainPrev: false// 是否向前追加火车车厢
+
     }
   },
   components: {
     Train
-  },
-  methods: {
-    toLeft () {
-      this.trainDirection = 0
-      this.curActiveTrainIndex = 0
-      this.$refs.trainBox.$refs.trainListBox.scrollLeft = 0
-    },
-    toRight () {
-      this.trainDirection = 1
-      this.curActiveTrainIndex = 0
-
-      this.$refs.trainBox.$refs.trainListBox.scrollLeft = this.$refs.trainBox.$refs.trainListBox.scrollWidth
-    },
-    emitCurActiveTrainIndex (activeIndex) {
-      this.curActiveTrainIndex = activeIndex
-      console.log('emitCurActiveTrainIndex', activeIndex)
-    }
   },
   mounted () {
     this.trainListData = [{
@@ -117,7 +124,48 @@ export default {
         }
       ]
     }]
+  },
+  methods: {
+    toLeft () {
+      this.trainDirection = 0
+      this.curActiveTrainIndex = 0
+      this.$refs.trainBox.$refs.trainListBox.scrollLeft = 0
+    },
+    toRight () {
+      this.trainDirection = 1
+      this.curActiveTrainIndex = 0
+
+      this.$refs.trainBox.$refs.trainListBox.scrollLeft = this.$refs.trainBox.$refs.trainListBox.scrollWidth
+    },
+    emitCurActiveTrainIndex (activeIndex) {
+      this.curActiveTrainIndex = activeIndex
+      console.log('emitCurActiveTrainIndex', activeIndex)
+    },
+    emitAddTrainBox (isPrev) {
+      this.trainTypeDialogVisible = true
+      this.isTrainPrev = isPrev
+    },
+    emitDeleteTrainBox (index) {
+      this.trainListData.splice(index, 1)
+    },
+    sureAddTrainBox () {
+      if (this.isTrainPrev) {
+        const addIndex = this.curActiveTrainIndex
+        this.trainListData.splice(addIndex, 0, {
+          type: this.trainType,
+          name: ''
+        })
+      } else {
+        const addIndex1 = this.curActiveTrainIndex + 1
+        this.trainListData.splice(addIndex1, 0, {
+          type: this.trainType,
+          name: ''
+        })
+      }
+      this.trainTypeDialogVisible = false
+    }
   }
+
 }
 </script>
 
