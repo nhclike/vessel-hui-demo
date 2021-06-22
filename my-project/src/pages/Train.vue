@@ -93,6 +93,8 @@
 </template>
 
 <script>
+import { debounce } from '@/utils/utils'
+const TRAINBOXWIDTH = 280
 export default {
   props: {
     trainDirection: {
@@ -125,24 +127,40 @@ export default {
     curActiveTrainIndex () {
       let index = 0
       if (this.trainDirection === 0) {
-        index = Math.floor(this.scrollLeft / 280)
+        index = Math.floor((this.scrollLeft + TRAINBOXWIDTH / 2) / TRAINBOXWIDTH)
       } else {
-        index = Math.floor(Math.abs(this.scrollLeft + this.$refs.trainBody.clientWidth - this.$refs.trainListBox.scrollWidth) / 280)
+        index = Math.floor((Math.abs(this.scrollLeft + this.$refs.trainBody.clientWidth - this.$refs.trainListBox.scrollWidth) + TRAINBOXWIDTH / 2) / TRAINBOXWIDTH)
       }
       return index
+    },
+    rowScrollLeft () {
+      return this.curActiveTrainIndex * TRAINBOXWIDTH
+    },
+    rowReverseScrollLeft () {
+      return this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - this.curActiveTrainIndex * TRAINBOXWIDTH
     }
   },
   watch: {
     curActiveTrainIndex (newVal, oldVal) {
       console.log(newVal, oldVal)
+      // 矫正scrollLeft位置
+      if (this.trainDirection === 0) {
+        if (this.scrollLeft !== this.rowScrollLeft) {
+          this.$refs.trainListBox.scrollLeft = this.rowScrollLeft
+        }
+      } else {
+        if (this.scrollLeft !== this.rowReverseScrollLeft) {
+          this.$refs.trainListBox.scrollLeft = this.rowReverseScrollLeft
+        }
+      }
       this.$emit('emitCurActiveTrainIndex', newVal)
     },
     needActiveTrainIndex (newVal, oldVal) {
       if (newVal !== this.curActiveTrainIndex) {
         if (this.trainDirection === 0) {
-          this.$refs.trainListBox.scrollLeft = newVal * 280
+          this.$refs.trainListBox.scrollLeft = newVal * TRAINBOXWIDTH
         } else {
-          this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - newVal * 280
+          this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - newVal * TRAINBOXWIDTH
         }
       }
     }
@@ -162,10 +180,10 @@ export default {
     }
   },
   methods: {
-    handleScroll () {
+    handleScroll: debounce(function () {
       console.log(this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
       this.scrollLeft = this.$refs.trainListBox.scrollLeft
-    },
+    }, 1000),
     addTrainBox (isPrev) {
       this.$emit('emitAddTrainBox', isPrev)
     },

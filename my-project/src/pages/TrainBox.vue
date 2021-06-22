@@ -19,7 +19,7 @@
       <Train
       :trainDirection="trainDirection"
       :trainListData="trainListData"
-      :needActiveTrainIndex="needActiveTrainIndex"
+      :needActiveTrainIndex="Number(needActiveTrainIndex)"
        @emitCurActiveTrainIndex="emitCurActiveTrainIndex"
        @emitAddTrainBox="emitAddTrainBox"
        @emitDeleteTrainBox="emitDeleteTrainBox"
@@ -66,6 +66,40 @@ export default {
     Train
   },
   mounted () {
+    // const data = {
+    //   code: 0,
+    //   data: {
+    //     list: [
+    //       {
+    //         name: '车厢1',
+    //         carriage: [
+    //           {
+    //             name: '集装箱1',
+    //             status: 0// 0正常1异常
+    //           },
+    //           {
+    //             name: '集装箱2',
+    //             status: 1
+    //           }
+    //         ]
+    //       },
+    //       {
+    //         name: '车厢2',
+    //         carriage: [
+    //           {
+    //             name: '集装箱1',
+    //             status: 0// 0正常1异常
+    //           },
+    //           {
+    //             name: '集装箱2',
+    //             status: 1
+    //           }
+    //         ]
+    //       }
+    //     ]
+    //   }
+    // }
+
     this.trainListData = [{
       type: 'NX70',
       name: '第1节平车',
