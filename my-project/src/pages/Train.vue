@@ -66,11 +66,17 @@
           'add-flex-row':trainDirection===0,
           'add-flex-row-reverse':trainDirection===1
         }">
-          <div class="add-carriage-item">
-            向前添加集装箱
+          <div class="add-carriage-item" >
+            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true)">
+              向前添加集装箱
+
+            </div>
           </div>
           <div class="add-carriage-item">
-            向后添加集装箱
+            <div class="add-carriage-wrapper" :class="[isShowAddCarriage?'show':'hide']"  @click="addCarriage()">
+              向后添加集装箱
+            </div>
+
           </div>
         </div>
         <div class="add-train-box" :class="{
@@ -148,6 +154,13 @@ export default {
     },
     rowReverseScrollLeft () {
       return this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - this.curActiveTrainIndex * TRAINBOXWIDTH
+    },
+    isShowPrevAddCarriage () {
+      const pIndex = this.curActiveTrainIndex - 1 > 0 ? this.curActiveTrainIndex - 1 : 0
+      return this.trainListData[pIndex].type !== 'P70'
+    },
+    isShowAddCarriage () {
+      return this.trainListData[Number(this.curActiveTrainIndex) + 1].type !== 'P70'
     }
   },
   watch: {
@@ -232,6 +245,10 @@ export default {
           })
         }
       })
+    },
+    // 增加集装箱
+    addCarriage (isPrev) {
+      alert('增加集装箱')
     }
   }
 }
@@ -321,9 +338,18 @@ export default {
         .add-carriage-item{
           height: 40px;
           width: @train-box-add-width;
-          background: #ddd;
-           position: relative;
+          position: relative;
           z-index: 1999;
+          .add-carriage-wrapper{
+            background: #ddd;
+            &.show{
+              display: block;
+            }
+            &.hide{
+              display: none;
+            }
+          }
+
         }
 
       }

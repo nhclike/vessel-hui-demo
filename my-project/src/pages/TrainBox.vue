@@ -49,6 +49,8 @@ import Train from './Train.vue'
 //   P70: '平车',
 //   C70: '敞车'
 // }
+// 需求点
+// 1棚车无集装箱
 export default {
   data () {
     return {
@@ -56,8 +58,8 @@ export default {
       trainListData: [],
       curActiveTrainIndex: 0,
       needActiveTrainIndex: -1,
-      trainType: 'NX70',
-      trainTypeDialogVisible: false,
+      trainType: 'NX70', // 新增加的火车车厢类型
+      trainTypeDialogVisible: false, // 增加车厢选择类型弹框显示
       isTrainPrev: false// 是否向前追加火车车厢
 
     }
@@ -104,7 +106,7 @@ export default {
       type: 'NX70',
       name: '第1节平车',
       isEdit: false,
-      box: [
+      box: [// 第一车厢必须有2个集装箱，否则添加集装箱有问题
         {
           name: '第1集装箱'
         },
@@ -134,7 +136,7 @@ export default {
           name: '第2集装箱'
         },
         {
-          name: ''
+          name: '第3集装箱'
         }
       ]
     },
@@ -144,10 +146,7 @@ export default {
       isEdit: false,
       box: [
         {
-          name: '第3集装箱'
-        },
-        {
-          name: ''
+          name: '第4集装箱'
         }
       ]
     },
@@ -164,9 +163,6 @@ export default {
       box: [
         {
           name: '第4集装箱'
-        },
-        {
-          name: ''
         }
       ]
     }]
@@ -209,13 +205,30 @@ export default {
     },
     sureAddTrainBox () {
       const _this = this
+      const trainItemData = {
+        type: this.trainType,
+        name: '',
+        isEdit: false
+      }
+      // if (this.trainType === 'P70') {
+      //   trainItemData = Object.assign(trainItemData, {
+      //     box: null
+      //   })
+      // } else {
+      //   trainItemData = Object.assign(trainItemData, {
+      //     box: [
+      //       {
+      //         name: ''
+      //       },
+      //       {
+      //         name: ''
+      //       }
+      //     ]
+      //   })
+      // }
       if (this.isTrainPrev) { // 向前添加
         const addIndex = this.curActiveTrainIndex
-        this.trainListData.splice(addIndex, 0, {
-          type: this.trainType,
-          name: '',
-          isEdit: false
-        })
+        this.trainListData.splice(addIndex, 0, trainItemData)
         if (this.trainDirection === 1) { // 反向
           this.$nextTick(() => {
             _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - _this.curActiveTrainIndex * 280
@@ -223,11 +236,7 @@ export default {
         }
       } else {
         const addIndex1 = this.curActiveTrainIndex + 1
-        this.trainListData.splice(addIndex1, 0, {
-          type: this.trainType,
-          name: '',
-          isEdit: false
-        })
+        this.trainListData.splice(addIndex1, 0, trainItemData)
         if (this.trainDirection === 0) {
           this.$nextTick(() => {
             _this.needActiveTrainIndex = _this.curActiveTrainIndex + 1
