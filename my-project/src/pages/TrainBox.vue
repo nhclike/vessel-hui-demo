@@ -55,7 +55,7 @@ export default {
       trainDirection: 0,
       trainListData: [],
       curActiveTrainIndex: 0,
-      needActiveTrainIndex: 0,
+      needActiveTrainIndex: -1,
       trainType: 'NX70',
       trainTypeDialogVisible: false,
       isTrainPrev: false// 是否向前追加火车车厢
@@ -175,13 +175,14 @@ export default {
     toLeft () {
       this.trainDirection = 0
       this.curActiveTrainIndex = 0
+      this.needActiveTrainIndex = -1// 此值必须重置为-1否则在第一个车厢前增加车厢会导致neeneedActiveTrainIndex=0如果初始值不为-1则无法触发监听
       this.$refs.trainBox.$refs.trainListBox.scrollLeft = 0
     },
     toRight () {
       this.trainDirection = 1
       this.curActiveTrainIndex = 0
-
-      this.$refs.trainBox.$refs.trainListBox.scrollLeft = this.$refs.trainBox.$refs.trainListBox.scrollWidth
+      this.needActiveTrainIndex = -1
+      this.$refs.trainBox.$refs.trainListBox.scrollLeft = this.$refs.trainBox.$refs.trainListBox.scrollWidth - this.$refs.trainBox.$refs.trainBody.clientWidth
     },
     emitCurActiveTrainIndex (activeIndex) {
       this.curActiveTrainIndex = activeIndex
@@ -193,15 +194,31 @@ export default {
     },
     emitDeleteTrainBox (index) {
       this.trainListData.splice(index, 1)
+      const _this = this
+      if (this.trainDirection === 0) {
+        this.$nextTick(() => {
+          _this.needActiveTrainIndex = index
+        })
+      } else {
+        this.$nextTick(() => {
+          _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - index * 280
+        })
+      }
     },
     sureAddTrainBox () {
-      if (this.isTrainPrev) {
+      const _this = this
+      if (this.isTrainPrev) { // 向前添加
         const addIndex = this.curActiveTrainIndex
         this.trainListData.splice(addIndex, 0, {
           type: this.trainType,
           name: '',
           isEdit: false
         })
+        if (this.trainDirection === 1) { // 反向
+          this.$nextTick(() => {
+            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - _this.curActiveTrainIndex * 280
+          })
+        }
       } else {
         const addIndex1 = this.curActiveTrainIndex + 1
         this.trainListData.splice(addIndex1, 0, {
@@ -209,6 +226,16 @@ export default {
           name: '',
           isEdit: false
         })
+        if (this.trainDirection === 0) {
+          this.$nextTick(() => {
+            _this.needActiveTrainIndex = _this.curActiveTrainIndex + 1
+          })
+        } else {
+          this.$nextTick(() => {
+            // 增加偏差触发handleScroll事件从而进一步触发curActiveTrainIndex计算属性，进而触发矫正计算
+            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - addIndex1 * 280 + 10
+          })
+        }
       }
       this.trainTypeDialogVisible = false
     }

@@ -142,7 +142,7 @@ export default {
   },
   watch: {
     curActiveTrainIndex (newVal, oldVal) {
-      console.log(newVal, oldVal)
+      console.log('curActiveTrainIndex', newVal, oldVal)
       // 矫正scrollLeft位置
       if (this.trainDirection === 0) {
         if (this.scrollLeft !== this.rowScrollLeft) {
@@ -156,12 +156,10 @@ export default {
       this.$emit('emitCurActiveTrainIndex', newVal)
     },
     needActiveTrainIndex (newVal, oldVal) {
-      if (newVal !== this.curActiveTrainIndex) {
-        if (this.trainDirection === 0) {
-          this.$refs.trainListBox.scrollLeft = newVal * TRAINBOXWIDTH
-        } else {
-          this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - newVal * TRAINBOXWIDTH
-        }
+      if (this.trainDirection === 0) {
+        this.$refs.trainListBox.scrollLeft = newVal * TRAINBOXWIDTH
+      } else {
+        this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - newVal * TRAINBOXWIDTH
       }
     }
   },
@@ -181,18 +179,21 @@ export default {
   },
   methods: {
     handleScroll: debounce(function () {
-      console.log(this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
+      console.log('handleScroll', this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
       this.scrollLeft = this.$refs.trainListBox.scrollLeft
     }, 1000),
     addTrainBox (isPrev) {
       this.$emit('emitAddTrainBox', isPrev)
     },
     fnInputBlur (item) {
-      console.log(item)
+      // console.log(item)
       item.isEdit = false
     },
     editTrainBox (item, index) {
       item.isEdit = true
+    },
+    reverseFixed () {
+      this.$refs.trainListBox.scrollLeft = this.rowReverseScrollLeft
     },
     deleteTrainBox (index) {
       this.$confirm('此操作将永久删除该车厢, 是否继续?', {
