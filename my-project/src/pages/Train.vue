@@ -22,7 +22,7 @@
               'P70':item.type==='P70'
 
             }" v-for="(item,index) in trainListData" :key="index">
-              <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}">
+              <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}" @click.stop="fnclickTrainBox(index)" >
                 <div class="carriage-box">
                   <div class="carriage-item" v-for="(cItem,cIndex) in item.box" :key="cIndex">
                       <span v-if="item&&item.name">{{cItem.name}}</span>
@@ -44,8 +44,8 @@
                   </div>
 
                   <template v-if="index===curActiveTrainIndex">
-                    <i class="h-icon-edit" @click="editTrainBox(item,index)"></i>
-                    <i class="h-icon-delete" @click="deleteTrainBox(index)"></i>
+                    <i class="h-icon-edit" @click.stop="editTrainBox(item,index)"></i>
+                    <i class="h-icon-delete" @click.stop="deleteTrainBox(index)"></i>
                   </template>
 
                 </div>
@@ -94,6 +94,9 @@
 
 <script>
 import { debounce } from '@/utils/utils'
+
+// 整体交互设计
+// 1通过改变scrollLeft动态计算当前激活车厢
 const TRAINBOXWIDTH = 280
 export default {
   props: {
@@ -129,8 +132,15 @@ export default {
       if (this.trainDirection === 0) {
         index = Math.floor((this.scrollLeft + TRAINBOXWIDTH / 2) / TRAINBOXWIDTH)
       } else {
-        index = Math.floor((Math.abs(this.scrollLeft + this.$refs.trainBody.clientWidth - this.$refs.trainListBox.scrollWidth) + TRAINBOXWIDTH / 2) / TRAINBOXWIDTH)
+        if (this.trainListData.length === 1) { // 反向从后向前删除最后一个边界处理
+          index = 0
+        } else {
+          const abs = Math.abs(this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - this.scrollLeft + TRAINBOXWIDTH / 2)
+          console.log('abs', abs)
+          index = Math.floor(abs / TRAINBOXWIDTH)
+        }
       }
+
       return index
     },
     rowScrollLeft () {
@@ -181,20 +191,29 @@ export default {
     handleScroll: debounce(function () {
       console.log('handleScroll', this.$refs.trainListBox.scrollLeft, this.$refs.trainListBox.scrollWidth)
       this.scrollLeft = this.$refs.trainListBox.scrollLeft
-    }, 1000),
-    addTrainBox (isPrev) {
-      this.$emit('emitAddTrainBox', isPrev)
-    },
+    }, 500),
+
     fnInputBlur (item) {
       // console.log(item)
       item.isEdit = false
     },
+    // 编辑车厢
     editTrainBox (item, index) {
       item.isEdit = true
     },
-    reverseFixed () {
-      this.$refs.trainListBox.scrollLeft = this.rowReverseScrollLeft
+    // 选中那个车厢激活那个车厢
+    fnclickTrainBox (index) {
+      if (this.trainDirection === 0) {
+        this.$refs.trainListBox.scrollLeft = index * TRAINBOXWIDTH
+      } else {
+        this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - index * TRAINBOXWIDTH
+      }
     },
+    // 增加车厢
+    addTrainBox (isPrev) {
+      this.$emit('emitAddTrainBox', isPrev)
+    },
+    // 删除车厢
     deleteTrainBox (index) {
       this.$confirm('此操作将永久删除该车厢, 是否继续?', {
         confirmButtonText: '确定',

@@ -201,7 +201,9 @@ export default {
         })
       } else {
         this.$nextTick(() => {
-          _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - index * 280
+          const sl = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - index * 280
+          console.log(sl)
+          _this.$refs.trainBox.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
         })
       }
     },
@@ -233,7 +235,7 @@ export default {
         } else {
           this.$nextTick(() => {
             // 增加偏差触发handleScroll事件从而进一步触发curActiveTrainIndex计算属性，进而触发矫正计算
-            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - addIndex1 * 280 + 10
+            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollLeft + 1
           })
         }
       }
