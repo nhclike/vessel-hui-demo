@@ -16,20 +16,24 @@
             'flex-row':trainDirection===0,
             'flex-row-reverse':trainDirection===1
             }">
-            <li class="train-item-box" :class="{
+            <li class="train-item-box"
+            v-for="(item,index) in trainListData" :key="index"
+            :class="{
               'C70':item.type==='C70',
               'NX70':item.type==='NX70',
               'P70':item.type==='P70'
 
-            }" v-for="(item,index) in trainListData" :key="index">
+            }" >
               <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}" @click.stop="fnclickTrainBox(index)" >
                 <div class="carriage-box">
                   <div class="carriage-item" v-for="(cItem,cIndex) in item.box" :key="cIndex">
+                    <div class="carriage-item-wrapper" v-if="cItem&&cItem.type>0">
                       <span v-if="item&&item.name">{{cItem.name}}</span>
                       <template v-if="index===curActiveTrainIndex">
                         <i class="h-icon-edit"></i>
                         <i class="h-icon-delete"></i>
                       </template>
+                    </div>
                   </div>
                 </div>
                 <div class="train-item-content">
@@ -67,10 +71,16 @@
           'add-flex-row-reverse':trainDirection===1
         }">
           <div class="add-carriage-item" >
-            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true)">
+            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage()">
               向前添加集装箱
 
             </div>
+          </div>
+           <div class="add-carriage-item">
+            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage()">
+              中间添加集装箱
+            </div>
+
           </div>
           <div class="add-carriage-item">
             <div class="add-carriage-wrapper" :class="[isShowAddCarriage?'show':'hide']"  @click="addCarriage()">
@@ -156,11 +166,14 @@ export default {
       return this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - this.curActiveTrainIndex * TRAINBOXWIDTH
     },
     isShowPrevAddCarriage () {
-      const pIndex = this.curActiveTrainIndex - 1 > 0 ? this.curActiveTrainIndex - 1 : 0
-      return this.trainListData[pIndex].type !== 'P70'
+      return this.trainListData[this.curActiveTrainIndex].type !== 'P70'
     },
     isShowAddCarriage () {
-      return this.trainListData[Number(this.curActiveTrainIndex) + 1].type !== 'P70'
+      if (this.curActiveTrainIndex === this.trainListData.length - 1) { // 最后一个是否向后添加集装箱按钮处理
+        return true
+      } else {
+        return this.trainListData[Number(this.curActiveTrainIndex) + 1].type !== 'P70'
+      }
     }
   },
   watch: {
@@ -247,7 +260,7 @@ export default {
       })
     },
     // 增加集装箱
-    addCarriage (isPrev) {
+    addCarriage () {
       alert('增加集装箱')
     }
   }
@@ -255,6 +268,7 @@ export default {
 </script>
 
 <style scoped lang="less">
+@train-box-height:200px;
 @train-box-width:200px;
 @train-box-add-width:80px;
 .train-box{
@@ -318,7 +332,7 @@ export default {
       }
     }
     .train-opt-box{
-      width: 360px;
+      width: @train-box-width+@train-box-add-width*2;
       height: calc(~"100% - 30px");
       // border: 1px solid red;
       position: relative;
@@ -336,8 +350,8 @@ export default {
         justify-content: space-between;
         position: relative;
         .add-carriage-item{
-          height: 40px;
-          width: @train-box-add-width;
+          height: 50px;
+          width: 40px;
           position: relative;
           z-index: 1999;
           .add-carriage-wrapper{
@@ -388,7 +402,7 @@ export default {
       }
       .train-item-wrapper{
         height: @train-box-width;
-        width: @train-box-width;
+        width: @train-box-height;
         &.curTop{
           position: relative;
           z-index: 1999;
@@ -400,12 +414,18 @@ export default {
           height: 70px;
           display: flex;
           align-items: center;
+          justify-content: space-between;
           .carriage-item{
-            border: 1px solid #000;
-            background: green;
-            color: #000;
-            width: 50%;
+            border: 1px solid transparent;
+            width: 80px;
             height: 60px;
+            .carriage-item-wrapper{
+              background: green;
+              color: #000;
+              width: 100%;
+              height: 100%;
+
+            }
             i{
               font-size: 24px;
             }

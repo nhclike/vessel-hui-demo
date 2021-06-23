@@ -50,7 +50,26 @@ import Train from './Train.vue'
 //   C70: '敞车'
 // }
 // 需求点
-// 1棚车无集装箱
+// 1蓬车无集装箱
+// 集装箱类型
+// 1上报的集装箱数据，根据集装箱type分为1异常--上报2正常  其中1异常编辑后变为正常2
+// 2 -1有集装箱无车厢的异常
+// 车厢类型
+// 1上报的数据 1异常2正常
+// 2 -1有集装箱无车厢的异常
+
+// 集装箱添加逻辑
+// 1根据添加按钮位置获得要操作的集装箱位置location
+// 2判断location的集装箱个数<2----添加集装箱到location---location位置上的数据后移一次---结束操作
+// 3location的集装箱个数===2
+// 4添加的集装箱到location,location的位置依次后移----跨车厢时
+// 4.1判断车厢是否为蓬车
+// ---是---判断下个车厢循环4.1和4.2
+// ---否---4.2
+// 4.2判断车厢的集装箱个数循环2和3步骤
+// 4.3判断车厢是否存在
+// 4.3.1不存在则新增type为-1的车厢及放置集装箱时type也设置为-1
+const TRAINBOXWIDTH = 280
 export default {
   data () {
     return {
@@ -106,12 +125,10 @@ export default {
       type: 'NX70',
       name: '第1节平车',
       isEdit: false,
-      box: [// 第一车厢必须有2个集装箱，否则添加集装箱有问题
+      box: [
         {
+          type: 2, // 集装箱type字段；0空位/占位集装箱；1上报的异常集装箱；2正常上报的集装箱
           name: '第1集装箱'
-        },
-        {
-          name: ''
         }
       ]
     },
@@ -119,13 +136,12 @@ export default {
       type: 'P70',
       name: '第2节棚车',
       isEdit: false,
-      box: []
+      box: [null, null]
     },
     {
       type: 'P70',
       name: '第3节棚车',
-      isEdit: false,
-      box: []
+      isEdit: false
     },
     {
       type: 'C70',
@@ -133,9 +149,11 @@ export default {
       isEdit: false,
       box: [
         {
+          type: 2,
           name: '第2集装箱'
         },
         {
+          type: 2,
           name: '第3集装箱'
         }
       ]
@@ -146,6 +164,7 @@ export default {
       isEdit: false,
       box: [
         {
+          type: 2,
           name: '第4集装箱'
         }
       ]
@@ -153,8 +172,7 @@ export default {
     {
       type: 'P70',
       name: '第6节棚车',
-      isEdit: false,
-      box: []
+      isEdit: false
     },
     {
       type: 'NX70',
@@ -162,7 +180,8 @@ export default {
       isEdit: false,
       box: [
         {
-          name: '第4集装箱'
+          type: 2,
+          name: '第5集装箱'
         }
       ]
     }]
@@ -197,7 +216,7 @@ export default {
         })
       } else {
         this.$nextTick(() => {
-          const sl = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - index * 280
+          const sl = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - index * TRAINBOXWIDTH
           console.log(sl)
           _this.$refs.trainBox.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
         })
@@ -205,33 +224,35 @@ export default {
     },
     sureAddTrainBox () {
       const _this = this
-      const trainItemData = {
+      let trainItemData = {
         type: this.trainType,
         name: '',
         isEdit: false
       }
-      // if (this.trainType === 'P70') {
-      //   trainItemData = Object.assign(trainItemData, {
-      //     box: null
-      //   })
-      // } else {
-      //   trainItemData = Object.assign(trainItemData, {
-      //     box: [
-      //       {
-      //         name: ''
-      //       },
-      //       {
-      //         name: ''
-      //       }
-      //     ]
-      //   })
-      // }
+      if (this.trainType === 'P70') {
+        trainItemData = Object.assign(trainItemData, {
+          box: [null, null]
+        })
+      } else {
+        trainItemData = Object.assign(trainItemData, {
+          box: [
+            {
+              type: 0,
+              name: ''
+            },
+            {
+              type: 0,
+              name: ''
+            }
+          ]
+        })
+      }
       if (this.isTrainPrev) { // 向前添加
         const addIndex = this.curActiveTrainIndex
         this.trainListData.splice(addIndex, 0, trainItemData)
         if (this.trainDirection === 1) { // 反向
           this.$nextTick(() => {
-            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - _this.curActiveTrainIndex * 280
+            _this.$refs.trainBox.$refs.trainListBox.scrollLeft = _this.$refs.trainBox.$refs.trainListBox.scrollWidth - _this.$refs.trainBox.$refs.trainBody.clientWidth - _this.curActiveTrainIndex * TRAINBOXWIDTH
           })
         }
       } else {
