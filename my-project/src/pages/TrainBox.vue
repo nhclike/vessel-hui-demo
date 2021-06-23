@@ -23,6 +23,7 @@
        @emitCurActiveTrainIndex="emitCurActiveTrainIndex"
        @emitAddTrainBox="emitAddTrainBox"
        @emitDeleteTrainBox="emitDeleteTrainBox"
+       @emitAddCarriage="emitAddCarriage"
        ref="trainBox">
        </Train>
 
@@ -136,12 +137,13 @@ export default {
       type: 'P70',
       name: '第2节棚车',
       isEdit: false,
-      box: [null, null]
+      box: []
     },
     {
       type: 'P70',
       name: '第3节棚车',
-      isEdit: false
+      isEdit: false,
+      box: []
     },
     {
       type: 'C70',
@@ -170,9 +172,10 @@ export default {
       ]
     },
     {
-      type: 'P70',
-      name: '第6节棚车',
-      isEdit: false
+      type: 'NX70',
+      name: '第6节平车',
+      isEdit: false,
+      box: []
     },
     {
       type: 'NX70',
@@ -220,6 +223,66 @@ export default {
           console.log(sl)
           _this.$refs.trainBox.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
         })
+      }
+    },
+    emitAddCarriage (isCur, index) {
+      // alert('增加集装箱')
+      let startLocation = []
+      if (isCur) {
+        startLocation = [this.curActiveTrainIndex, index]
+
+        // 第一个添加
+        if (index === 0) {
+          if (this.trainListData[startLocation[0]].box.length === 0) {
+            this.trainListData[startLocation[0]].box = [{
+              type: 2,
+              name: ''
+            }]
+          } else if (this.trainListData[startLocation[0]].box.length === 1) {
+            const midVal = this.trainListData[startLocation[0]].box[0]
+            this.trainListData[startLocation[0]].box = [{
+              type: 2,
+              name: ''
+            }, midVal]
+          } else {
+
+          }
+        } else { // 第二个添加
+          if (this.trainListData[startLocation[0]].box.length === 0) {
+            this.trainListData[startLocation[0]].box = [{
+              type: 2,
+              name: '',
+              location: 'right'// 针对中间有车厢上集装箱数量为0，从中间加集装箱的场景---需要添加一个集装箱但是靠右显示
+            }]
+          } else if (this.trainListData[startLocation[0]].box.length === 1) {
+            if (this.trainListData[startLocation[0]].box[0].location) {
+              delete this.trainListData[startLocation[0]].box[0].location
+            }
+            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], {
+              type: 2,
+              name: ''
+            }]
+          } else {
+
+          }
+        }
+      } else {
+        // 第三个添加
+        startLocation = [this.curActiveTrainIndex + 1, 0]
+        if (this.trainListData[startLocation[0]].box.length === 0) {
+          this.trainListData[startLocation[0]].box = [{
+            type: 2,
+            name: ''
+          }]
+        } else if (this.trainListData[startLocation[0]].box.length === 1) {
+          const midVal = this.trainListData[startLocation[0]].box[0]
+          this.trainListData[startLocation[0]].box = [{
+            type: 2,
+            name: ''
+          }, midVal]
+        } else {
+
+        }
       }
     },
     sureAddTrainBox () {

@@ -26,8 +26,12 @@
             }" >
               <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}" @click.stop="fnclickTrainBox(index)" >
                 <div class="carriage-box">
-                  <div class="carriage-item" v-for="(cItem,cIndex) in item.box" :key="cIndex">
-                    <div class="carriage-item-wrapper" v-if="cItem&&cItem.type>0">
+                  <div class="carriage-item"
+
+                  v-for="(cItem,cIndex) in item.box" :key="cIndex">
+                    <div class="carriage-item-wrapper"
+                    :class="[cItem.location==='right'||cIndex===1?'f-right':'f-left']"
+                     v-if="cItem.type!==0">
                       <span v-if="item&&item.name">{{cItem.name}}</span>
                       <template v-if="index===curActiveTrainIndex">
                         <i class="h-icon-edit"></i>
@@ -71,19 +75,19 @@
           'add-flex-row-reverse':trainDirection===1
         }">
           <div class="add-carriage-item" >
-            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage()">
+            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true,0)">
               向前添加集装箱
 
             </div>
           </div>
            <div class="add-carriage-item">
-            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage()">
+            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true,1)">
               中间添加集装箱
             </div>
 
           </div>
           <div class="add-carriage-item">
-            <div class="add-carriage-wrapper" :class="[isShowAddCarriage?'show':'hide']"  @click="addCarriage()">
+            <div class="add-carriage-wrapper" :class="[isShowAddCarriage?'show':'hide']"  @click="addCarriage(false,0)">
               向后添加集装箱
             </div>
 
@@ -260,8 +264,8 @@ export default {
       })
     },
     // 增加集装箱
-    addCarriage () {
-      alert('增加集装箱')
+    addCarriage (isCur, index) {
+      this.$emit('emitAddCarriage', isCur, index)
     }
   }
 }
@@ -412,19 +416,24 @@ export default {
         .carriage-box{
           border: 2px solid #000;
           height: 70px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          width: 100%;
+          overflow: hidden;
           .carriage-item{
             border: 1px solid transparent;
-            width: 80px;
-            height: 60px;
+
+            .f-right{
+              float: right;
+            }
+            .f-left{
+              float: left;
+            }
             .carriage-item-wrapper{
               background: green;
               color: #000;
               width: 100%;
               height: 100%;
-
+              width: 80px;
+              height: 60px;
             }
             i{
               font-size: 24px;
