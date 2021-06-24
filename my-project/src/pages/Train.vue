@@ -42,10 +42,16 @@
                     class="carriage-item-wrapper"
 
                      >
-                      <span v-if="cItem&&cItem.name">{{cItem.name}}</span>
+                      <span v-if="index!=curActiveTrainIndex||!cItem.isEdit">{{cItem.name}}</span>
+                      <input type="text"
+                      v-focus="true"
+                      v-if="index===curActiveTrainIndex&&cItem.isEdit"
+                      @blur="fnInputBlur(cItem)"
+                      v-model="cItem.name"
+                      >
                       <template v-if="index===curActiveTrainIndex">
-                        <i class="h-icon-edit"></i>
-                        <i class="h-icon-delete"></i>
+                        <i class="h-icon-edit" @click.stop="editCarriage(item,index,cItem,cIndex)"></i>
+                        <i class="h-icon-delete" @click.stop="deleteCarriage(index,cIndex)"></i>
                       </template>
                     </div>
                   </div>
@@ -55,7 +61,7 @@
                     <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.name}}</span>
                     <input v-focus="true"
                       v-if="index===curActiveTrainIndex&&item.isEdit"
-                      ref="inputList"
+
                       @blur="fnInputBlur(item)"
                       type="text"
                       v-model="item.name">
@@ -290,6 +296,10 @@ export default {
           _this.isCanClick = true
         }, 500)
       }
+    },
+    editCarriage (item, index, cItem, cIndex) {
+      console.log('editCarriage', cItem)
+      item.box[cIndex].isEdit = true
     }
   }
 }
@@ -359,6 +369,7 @@ export default {
         }
       }
     }
+    //操作区域
     .train-opt-box{
       width: @train-box-width+@train-box-add-width*2;
       height: calc(~"100% - 30px");
@@ -478,6 +489,12 @@ export default {
               color: #000;
               width: 100%;
               height: 100%;
+              input{
+                width: 100%;
+                min-width: 30px;
+                height: 30px;
+                display: inline-block;
+              }
 
             }
             i{

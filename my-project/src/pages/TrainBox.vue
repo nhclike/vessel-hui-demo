@@ -72,10 +72,7 @@ import Train from './Train.vue'
 // 4.3判断车厢是否存在
 // 4.3.1不存在则新增type为-1的车厢及放置集装箱时type也设置为-1
 const TRAINBOXWIDTH = 280
-const NEWCARRIAGEDATA = {
-  status: 2, // 集装箱status字段；1上报的异常集装箱；2正常上报的集装箱
-  name: ''
-}
+
 export default {
   data () {
     return {
@@ -85,12 +82,19 @@ export default {
       needActiveTrainIndex: -1,
       trainType: 'NX70', // 新增加的火车车厢类型
       trainTypeDialogVisible: false, // 增加车厢选择类型弹框显示
-      isTrainPrev: false// 是否向前追加火车车厢
-
+      isTrainPrev: false, // 是否向前追加火车车厢
+      newCarriageData: {
+        status: 1, // 集装箱status字段；1上报的异常集装箱；2正常上报的集装箱
+        name: '',
+        isEdit: false
+      }
     }
   },
   components: {
     Train
+  },
+  computed: {
+
   },
   mounted () {
     // const data = {
@@ -135,7 +139,8 @@ export default {
       box: [
         {
           status: 2,
-          name: '第1集装箱'
+          name: '第1集装箱',
+          isEdit: false
         }
       ]
     },
@@ -161,11 +166,13 @@ export default {
       box: [
         {
           status: 2,
-          name: '第2集装箱'
+          name: '第2集装箱',
+          isEdit: false
         },
         {
           status: 2,
-          name: '第3集装箱'
+          name: '第3集装箱',
+          isEdit: false
         }
       ]
     },
@@ -177,11 +184,13 @@ export default {
       box: [
         {
           status: 2,
-          name: '第4集装箱'
+          name: '第4集装箱',
+          isEdit: false
         },
         {
           status: 2,
-          name: '第5集装箱'
+          name: '第5集装箱',
+          isEdit: false
         }
       ]
     },
@@ -198,7 +207,8 @@ export default {
       box: [
         {
           status: 2,
-          name: '第6集装箱'
+          name: '第6集装箱',
+          isEdit: false
         }
       ]
     }]
@@ -250,26 +260,26 @@ export default {
           this.fnAddCarriage(startLocation)
         } else { // 第二个添加
           if (this.trainListData[startLocation[0]].box.length === 0) {
-            let adata = {}
-            if (this.trainDirection === 0) {
-              adata = Object.assign(NEWCARRIAGEDATA, {
-                location: 'right'
-              })
-            } else {
-              adata = Object.assign(NEWCARRIAGEDATA, {
-                location: 'left'
-              })
-            }
-
-            this.trainListData[startLocation[0]].box = [adata]
+            // const adata = {}
+            // if (this.trainDirection === 0) {
+            //   adata = Object.assign(Object.assign({}, this.newCarriageData), {
+            //     location: 'right'
+            //   })
+            // } else {
+            //   adata = Object.assign(Object.assign({}, this.newCarriageData), {
+            //     location: 'left'
+            //   })
+            // }
+            // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
+            this.trainListData[startLocation[0]].box = [Object.assign({}, this.newCarriageData)]
           } else if (this.trainListData[startLocation[0]].box.length === 1) {
             if (this.trainListData[startLocation[0]].box[0].location) {
               delete this.trainListData[startLocation[0]].box[0].location
             }
-            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], NEWCARRIAGEDATA]
+            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], Object.assign({}, this.newCarriageData)]
           } else {
             const ldata = this.trainListData[startLocation[0]].box[1]
-            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], NEWCARRIAGEDATA]
+            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], Object.assign({}, this.newCarriageData)]
             // 思路
             // 中间添加和最后一个添加区别仅在于
             // 中间添加按钮的后一个集装箱处理和最后一个添加，添加的是空数据而此时的模拟最后一个添加添加的是前一个车厢的最后一个数据
@@ -294,7 +304,7 @@ export default {
     },
     // 有空位场景
     fnCurLengthLT2 (startLocation, lastVal) {
-      const lData = lastVal || NEWCARRIAGEDATA
+      const lData = lastVal || Object.assign({}, this.newCarriageData)
       if (this.trainListData[startLocation[0]].box.length === 0) {
         this.trainListData[startLocation[0]].box = [lData]
       } else if (this.trainListData[startLocation[0]].box.length === 1) {
@@ -343,7 +353,7 @@ export default {
 
           recordTrainData[0] = this.trainListData[i].box[0]
           if (i === startLocation[0]) {
-            this.trainListData[i].box[0] = addData || NEWCARRIAGEDATA
+            this.trainListData[i].box[0] = addData || Object.assign({}, this.newCarriageData)
           } else {
             this.trainListData[i].box[0] = recordTrainData[1]
           }
