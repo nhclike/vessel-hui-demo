@@ -24,15 +24,19 @@
               'P70':item.type==='P70'
 
             }" >
-              <div class="train-item-wrapper" :class="{'curTop':index===curActiveTrainIndex}" @click.stop="fnclickTrainBox(index)" >
-                <div class="carriage-box">
+              <div class="train-item-wrapper"
+              :class="{'curTop':index===curActiveTrainIndex}"
+              @click.stop="fnclickTrainBox(index)" >
+                <!-- 集装箱 -->
+                <div class="carriage-box" v-if="item.box">
                   <div class="carriage-item"
 
                   v-for="(cItem,cIndex) in item.box" :key="cIndex">
-                    <div class="carriage-item-wrapper"
+                    <div
+                    class="carriage-item-wrapper"
                     :class="[cItem.location==='right'||cIndex===1?'f-right':'f-left']"
-                     v-if="cItem.type!==0">
-                      <span v-if="item&&item.name">{{cItem.name}}</span>
+                     >
+                      <span v-if="cItem&&cItem.name">{{cItem.name}}</span>
                       <template v-if="index===curActiveTrainIndex">
                         <i class="h-icon-edit"></i>
                         <i class="h-icon-delete"></i>
@@ -75,19 +79,25 @@
           'add-flex-row-reverse':trainDirection===1
         }">
           <div class="add-carriage-item" >
-            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true,0)">
+            <div class="add-carriage-wrapper"
+             :class="[isShowPrevAddCarriage?'show':'hide']"
+              @click.stop="addCarriage(true,0)">
               向前添加集装箱
 
             </div>
           </div>
            <div class="add-carriage-item">
-            <div class="add-carriage-wrapper" :class="[isShowPrevAddCarriage?'show':'hide']" @click="addCarriage(true,1)">
+            <div class="add-carriage-wrapper"
+            :class="[isShowPrevAddCarriage?'show':'hide']"
+             @click.stop="addCarriage(true,1)">
               中间添加集装箱
             </div>
 
           </div>
           <div class="add-carriage-item">
-            <div class="add-carriage-wrapper" :class="[isShowAddCarriage?'show':'hide']"  @click="addCarriage(false,0)">
+            <div class="add-carriage-wrapper"
+            :class="[isShowAddCarriage?'show':'hide']"
+             @click.stop="addCarriage(false,0)">
               向后添加集装箱
             </div>
 
