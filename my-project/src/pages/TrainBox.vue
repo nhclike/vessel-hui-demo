@@ -24,6 +24,7 @@
        @emitAddTrainBox="emitAddTrainBox"
        @emitDeleteTrainBox="emitDeleteTrainBox"
        @emitAddCarriage="emitAddCarriage"
+       @emitDeleteCarriage="emitDeleteCarriage"
        ref="trainBox">
        </Train>
 
@@ -248,18 +249,20 @@ export default {
           _this.$refs.trainBox.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
         })
       }
+      this.$message({
+        type: 'success',
+        message: '删除成功!'
+      })
     },
     emitAddCarriage (isCur, index) {
       console.log('增加集装箱', index)
-      let startLocation = []
 
       if (isCur) {
-        startLocation = [this.curActiveTrainIndex, index]
         // 第一个添加
         if (index === 0) {
-          this.fnAddCarriage(startLocation)
+          this.fnAddCarriage(this.curActiveTrainIndex)
         } else { // 第二个添加
-          if (this.trainListData[startLocation[0]].box.length === 0) {
+          if (this.trainListData[this.curActiveTrainIndex].box.length === 0) {
             // const adata = {}
             // if (this.trainDirection === 0) {
             //   adata = Object.assign(Object.assign({}, this.newCarriageData), {
@@ -271,32 +274,39 @@ export default {
             //   })
             // }
             // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
-            this.trainListData[startLocation[0]].box = [Object.assign({}, this.newCarriageData)]
-          } else if (this.trainListData[startLocation[0]].box.length === 1) {
-            if (this.trainListData[startLocation[0]].box[0].location) {
-              delete this.trainListData[startLocation[0]].box[0].location
+            this.trainListData[this.curActiveTrainIndex].box = [Object.assign({}, this.newCarriageData)]
+          } else if (this.trainListData[this.curActiveTrainIndex].box.length === 1) {
+            if (this.trainListData[this.curActiveTrainIndex].box[0].location) {
+              delete this.trainListData[this.curActiveTrainIndex].box[0].location
             }
-            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], Object.assign({}, this.newCarriageData)]
+            this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
           } else {
-            const ldata = this.trainListData[startLocation[0]].box[1]
-            this.trainListData[startLocation[0]].box = [this.trainListData[startLocation[0]].box[0], Object.assign({}, this.newCarriageData)]
+            const ldata = this.trainListData[this.curActiveTrainIndex].box[1]
+            this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
             // 思路
             // 中间添加和最后一个添加区别仅在于
             // 中间添加按钮的后一个集装箱处理和最后一个添加，添加的是空数据而此时的模拟最后一个添加添加的是前一个车厢的最后一个数据
-            const next = startLocation[0] + 1
+            const next = this.curActiveTrainIndex + 1
             this.nextAdd(next, ldata)// 模拟触发第三个集装箱增加过程，处理如果下个车厢是蓬车则后延
           }
         }
       } else {
         // 第三个添加
-        startLocation = [this.curActiveTrainIndex + 1, 0]
-        this.fnAddCarriage(startLocation)
+
+        this.fnAddCarriage(this.curActiveTrainIndex + 1)
       }
+    },
+    emitDeleteCarriage (index, cIndex) {
+      this.trainListData[index].box.splice(cIndex, 1)
+      this.$message({
+        type: 'success',
+        message: '删除成功!'
+      })
     },
     // 模拟触发第三个增加集装箱事件
     nextAdd (next, ldata) {
       if (this.trainListData[next].type !== 'P70') {
-        this.fnAddCarriage([next, 0], ldata)
+        this.fnAddCarriage(next, ldata)
       } else {
         next++
         this.nextAdd(next, ldata)
@@ -305,18 +315,18 @@ export default {
     // 有空位场景
     fnCurLengthLT2 (startLocation, lastVal) {
       const lData = lastVal || Object.assign({}, this.newCarriageData)
-      if (this.trainListData[startLocation[0]].box.length === 0) {
-        this.trainListData[startLocation[0]].box = [lData]
-      } else if (this.trainListData[startLocation[0]].box.length === 1) {
-        const midVal = this.trainListData[startLocation[0]].box[0]
-        this.trainListData[startLocation[0]].box = [lData, midVal]
+      if (this.trainListData[startLocation].box.length === 0) {
+        this.trainListData[startLocation].box = [lData]
+      } else if (this.trainListData[startLocation].box.length === 1) {
+        const midVal = this.trainListData[startLocation].box[0]
+        this.trainListData[startLocation].box = [lData, midVal]
       }
     },
     // 从每个车厢的第一个集装箱处开始添加集装箱
     fnAddCarriage (startLocation, addData) { // addData决定首位添加的是空数据还是前一个车厢的最后一个集装箱数据
       const recordTrainData = []
-      // let firstOpt = startLocation[0]
-      for (let i = startLocation[0]; i <= this.trainListData.length; i++) {
+      // let firstOpt = startLocation
+      for (let i = startLocation; i <= this.trainListData.length; i++) {
         if (!this.trainListData[i]) {
           this.trainListData.push({
             status: 2,
@@ -332,14 +342,14 @@ export default {
           continue
         }
         if (this.trainListData[i].box.length < 2) { // 碰到有空位置的场景
-          if (i === startLocation[0]) { // 首次操作的车厢
+          if (i === startLocation) { // 首次操作的车厢
             if (addData) {
               this.fnCurLengthLT2(startLocation, addData)
             } else {
               this.fnCurLengthLT2(startLocation)
             }
           } else {
-            this.fnCurLengthLT2([i, 0], recordTrainData[1])
+            this.fnCurLengthLT2(i, recordTrainData[1])
           }
 
           break
@@ -352,7 +362,7 @@ export default {
           // 3第二个集装箱放值之前先取出记录保存，再给第二个集装箱放之前保存的第一个集装箱
 
           recordTrainData[0] = this.trainListData[i].box[0]
-          if (i === startLocation[0]) {
+          if (i === startLocation) {
             this.trainListData[i].box[0] = addData || Object.assign({}, this.newCarriageData)
           } else {
             this.trainListData[i].box[0] = recordTrainData[1]

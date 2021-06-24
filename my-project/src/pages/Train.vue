@@ -273,10 +273,6 @@ export default {
         cancelButtonText: '取消',
         onConfirm: () => {
           this.$emit('emitDeleteTrainBox', index)
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
         },
         onCancel: () => {
           this.$message({
@@ -300,6 +296,22 @@ export default {
     editCarriage (item, index, cItem, cIndex) {
       console.log('editCarriage', cItem)
       item.box[cIndex].isEdit = true
+    },
+    // 删除集装箱
+    deleteCarriage (index, cIndex) {
+      this.$confirm('此操作将永久删除该集装箱, 是否继续?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        onConfirm: () => {
+          this.$emit('emitDeleteCarriage', index, cIndex)
+        },
+        onCancel: () => {
+          this.$message({
+            type: 'success',
+            message: '已取消删除!'
+          })
+        }
+      })
     }
   }
 }
