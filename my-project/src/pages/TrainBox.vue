@@ -316,7 +316,7 @@ export default {
     },
     // 模拟触发第三个增加集装箱事件
     nextAdd (next, ldata) {
-      if (this.trainListData[next].type !== 'P70') {
+      if (!this.trainListData[next] || this.trainListData[next].type !== 'P70') { //! this.trainListData[next]是在最后一个车厢有2个集装箱的时候点击中间添加集装箱按钮边界处理
         this.fnAddCarriage(next, ldata)
       } else {
         next++
@@ -342,13 +342,26 @@ export default {
       // let firstOpt = startLocation
       for (let i = startLocation; i <= this.trainListData.length; i++) {
         if (!this.trainListData[i]) {
-          this.trainListData.push({
-            status: 2,
-            type: '', // 错误状态的车厢（无车厢type）
-            name: '',
-            isEdit: false,
-            box: [recordTrainData[1]]
+          this.$confirm('此操作将产生无车厢的集装箱, 是否继续?', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            onConfirm: () => {
+              this.trainListData.push({
+                status: 2,
+                type: '', // 错误状态的车厢（无车厢type）
+                name: '',
+                isEdit: false,
+                box: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
+              })
+            },
+            onCancel: () => {
+              this.$message({
+                type: 'success',
+                message: '已取消删除!'
+              })
+            }
           })
+
           break
         }
         if (this.trainListData[i].type === 'P70') { // 碰到棚车直接跳过
