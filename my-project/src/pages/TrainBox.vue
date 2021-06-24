@@ -185,12 +185,12 @@ export default {
         }
       ]
     },
-    // {
-    //   type: 'NX70',
-    //   name: '第6节平车',
-    //   isEdit: false,
-    //   box: []
-    // },
+    {
+      type: 'NX70',
+      name: '第6节平车',
+      isEdit: false,
+      box: []
+    },
     {
       type: 'NX70',
       name: '第7节平车',
@@ -250,11 +250,18 @@ export default {
           this.fnAddCarriage(startLocation)
         } else { // 第二个添加
           if (this.trainListData[startLocation[0]].box.length === 0) {
-            this.trainListData[startLocation[0]].box = [{
-              status: 2,
-              name: '',
-              location: 'right'// 针对中间有车厢上集装箱数量为0，从中间加集装箱的场景---需要添加一个集装箱但是靠右显示
-            }]
+            let adata = {}
+            if (this.trainDirection === 0) {
+              adata = Object.assign(NEWCARRIAGEDATA, {
+                location: 'right'
+              })
+            } else {
+              adata = Object.assign(NEWCARRIAGEDATA, {
+                location: 'left'
+              })
+            }
+
+            this.trainListData[startLocation[0]].box = [adata]
           } else if (this.trainListData[startLocation[0]].box.length === 1) {
             if (this.trainListData[startLocation[0]].box[0].location) {
               delete this.trainListData[startLocation[0]].box[0].location

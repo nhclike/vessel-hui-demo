@@ -28,13 +28,19 @@
               :class="{'curTop':index===curActiveTrainIndex}"
               @click.stop="fnclickTrainBox(index)" >
                 <!-- 集装箱 -->
-                <div class="carriage-box" v-if="item.box">
+                <div class="carriage-box"  :class="{
+                        'float-row':trainDirection===0,
+                        'float-row-reverse':trainDirection===1
+                      }" v-if="item.box">
                   <div class="carriage-item"
-
-                  v-for="(cItem,cIndex) in item.box" :key="cIndex">
+                    :class="{
+                      'f-left':cItem.location==='left',
+                      'f-right':cItem.location==='right'
+                    }"
+                    v-for="(cItem,cIndex) in item.box" :key="cIndex">
                     <div
                     class="carriage-item-wrapper"
-                    :class="[cItem.location==='right'||cIndex===1?'f-right':'f-left']"
+
                      >
                       <span v-if="cItem&&cItem.name">{{cItem.name}}</span>
                       <template v-if="index===curActiveTrainIndex">
@@ -436,22 +442,43 @@ export default {
           height: 70px;
           width: 100%;
           overflow: hidden;
+          &.float-row{
+            .carriage-item{
+              &:first-child{
+                float: left;
+              }
+              &:nth-child(2){
+                float: right;
+              }
+            }
+          }
+          &.float-row-reverse{
+            .carriage-item{
+              &:first-child{
+                float: right;
+              }
+              &:nth-child(2){
+                float: left;
+              }
+            }
+          }
+          .f-right{
+            float: right !important;
+          }
+          .f-left{
+            float: left !important;
+          }
           .carriage-item{
-            border: 1px solid transparent;
+            border: 1px solid yellow;
+            width: 80px;
+            height: 60px;
 
-            .f-right{
-              float: right;
-            }
-            .f-left{
-              float: left;
-            }
             .carriage-item-wrapper{
               background: green;
               color: #000;
               width: 100%;
               height: 100%;
-              width: 80px;
-              height: 60px;
+
             }
             i{
               font-size: 24px;
