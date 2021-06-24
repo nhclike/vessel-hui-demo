@@ -240,7 +240,7 @@ export default {
       }
     },
     emitAddCarriage (isCur, index) {
-      // alert('增加集装箱')
+      console.log('增加集装箱', index)
       let startLocation = []
 
       if (isCur) {

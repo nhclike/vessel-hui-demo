@@ -152,7 +152,8 @@ export default {
         paddingLeft: '200px'
       },
       scrollLeft: 0,
-      isEditTrainBox: false
+      isEditTrainBox: false,
+      isCanClick: true
 
     }
   },
@@ -275,7 +276,14 @@ export default {
     },
     // 增加集装箱
     addCarriage (isCur, index) {
-      this.$emit('emitAddCarriage', isCur, index)
+      const _this = this
+      if (this.isCanClick) {
+        this.isCanClick = false
+        setTimeout(function () {
+          _this.$emit('emitAddCarriage', isCur, index)
+          _this.isCanClick = true
+        }, 500)
+      }
     }
   }
 }
