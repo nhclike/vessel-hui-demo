@@ -262,24 +262,35 @@ export default {
         if (index === 0) {
           this.fnAddCarriage(this.curActiveTrainIndex)
         } else { // 第二个添加
+          let adata = {}
+          if (this.trainDirection === 0) {
+            adata = Object.assign(Object.assign({
+              location: 'right'
+            }, this.newCarriageData))
+          } else {
+            adata = Object.assign(Object.assign({
+              location: 'left'
+            }, this.newCarriageData))
+          }
           if (this.trainListData[this.curActiveTrainIndex].box.length === 0) {
-            // const adata = {}
-            // if (this.trainDirection === 0) {
-            //   adata = Object.assign(Object.assign({}, this.newCarriageData), {
-            //     location: 'right'
-            //   })
-            // } else {
-            //   adata = Object.assign(Object.assign({}, this.newCarriageData), {
-            //     location: 'left'
-            //   })
-            // }
+            this.trainListData[this.curActiveTrainIndex].box = [adata]
             // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
-            this.trainListData[this.curActiveTrainIndex].box = [Object.assign({}, this.newCarriageData)]
+            // this.trainListData[this.curActiveTrainIndex].box = [Object.assign({}, this.newCarriageData)]
           } else if (this.trainListData[this.curActiveTrainIndex].box.length === 1) {
+            // 点击中间添加集装箱，激活车厢只有一个集装箱场景有2种
+            // 1当前集装箱是第一步点击中间添加集装箱按钮添加的集装箱（包含location特殊标识）
+            // 2当前集装箱是上报上来的集装箱或者点击第一个添加集装箱按钮添加的集装箱（正常）
             if (this.trainListData[this.curActiveTrainIndex].box[0].location) {
+              // 场景1中第二次点击中间添加按钮结果
+              // 保持当前激活车厢集装箱length仍然为1
               delete this.trainListData[this.curActiveTrainIndex].box[0].location
+              const lldata = this.trainListData[this.curActiveTrainIndex].box[0]
+              this.trainListData[this.curActiveTrainIndex].box = [adata]
+              const nnext = this.curActiveTrainIndex + 1
+              this.nextAdd(nnext, lldata)
+            } else {
+              this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
             }
-            this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
           } else {
             const ldata = this.trainListData[this.curActiveTrainIndex].box[1]
             this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
@@ -318,6 +329,9 @@ export default {
       if (this.trainListData[startLocation].box.length === 0) {
         this.trainListData[startLocation].box = [lData]
       } else if (this.trainListData[startLocation].box.length === 1) {
+        if (this.trainListData[startLocation].box[0].location) {
+          delete this.trainListData[startLocation].box[0].location
+        }
         const midVal = this.trainListData[startLocation].box[0]
         this.trainListData[startLocation].box = [lData, midVal]
       }
