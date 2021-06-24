@@ -94,15 +94,15 @@
             <div class="add-carriage-wrapper"
              :class="[isShowPrevAddCarriage?'show':'hide']"
               @click.stop="addCarriage(true,0)">
-              向前添加集装箱
+              +添加箱
 
             </div>
           </div>
-           <div class="add-carriage-item">
-            <div class="add-carriage-wrapper"
+           <div class="add-carriage-item middle">
+            <div class="add-carriage-wrapper "
             :class="[isShowPrevAddCarriage?'show':'hide']"
              @click.stop="addCarriage(true,1)">
-              中间添加集装箱
+             +箱
             </div>
 
           </div>
@@ -110,7 +110,7 @@
             <div class="add-carriage-wrapper"
             :class="[isShowAddCarriage?'show':'hide']"
              @click.stop="addCarriage(false,0)">
-              向后添加集装箱
+              +添加箱
             </div>
 
           </div>
@@ -120,10 +120,10 @@
           'add-flex-row-reverse':trainDirection===1
         }">
           <div class="add-train-item" @click="addTrainBox(true)">
-            向前添加火车
+            +添加车
           </div>
           <div class="add-train-item"  @click="addTrainBox(false)">
-            向后添加火车
+            +添加车
           </div>
         </div>
 
@@ -139,7 +139,7 @@ import { debounce } from '@/utils/utils'
 
 // 整体交互设计
 // 1通过改变scrollLeft动态计算当前激活车厢
-const TRAINBOXWIDTH = 280
+const TRAINBOXWIDTH = 428
 export default {
   props: {
     trainDirection: {
@@ -318,11 +318,12 @@ export default {
 </script>
 
 <style scoped lang="less">
-@train-box-height:200px;
-@train-box-width:200px;
+@train-box-height:245px;
+@train-box-width:348px;
 @train-box-add-width:80px;
 .train-box{
-  height: 310px;
+  height: 365px;
+  padding-top: 80px;
   width:1200px;
   border: 3px solid #000;
   .train-top{
@@ -401,12 +402,19 @@ export default {
         justify-content: space-between;
         position: relative;
         .add-carriage-item{
-          height: 50px;
-          width: 40px;
+          &.middle{
+            width:28px;
+            height:55px !important;
+          }
+          height: 60px;
+          width: 75px;
           position: relative;
+          display: inline-block;
           z-index: 1999;
           .add-carriage-wrapper{
             background: #ddd;
+            height: 100%;
+            width: 100%;
             &.show{
               display: block;
             }
@@ -426,7 +434,7 @@ export default {
         justify-content: space-between;
         .add-train-item{
           background: #f5f5f5;
-          height:80px;
+          height:154px;
           width: @train-box-add-width;
           position: relative;
           z-index: 1999;
@@ -452,8 +460,9 @@ export default {
         }
       }
       .train-item-wrapper{
-        height: @train-box-width;
-        width: @train-box-height;
+        height:@train-box-height;
+        width:@train-box-width;
+        padding: 12px 16px 0 16px;
         &.curTop{
           position: relative;
           z-index: 1999;
@@ -492,9 +501,9 @@ export default {
             float: left !important;
           }
           .carriage-item{
-            border: 1px solid yellow;
-            width: 80px;
-            height: 60px;
+            // border: 1px solid yellow;
+            width: 136px;
+            height: 72px;
 
             .carriage-item-wrapper{
               background: green;
@@ -515,7 +524,7 @@ export default {
           }
         }
         .train-item-content{
-          height: 100px;
+          height: 156px;
           width: 100%;
           color: #000;
           i{
