@@ -931,9 +931,15 @@ export default {
         position: relative;
         .add-carriage-item{
           &.middle{
-            width:28px;
+             width:28px;
             height:55px !important;
+          .add-carriage-wrapper{
+            width: 100%;
+            height: 100%;
             background-image: url("@{base-url-path}/add_carriage_small.png");
+
+          }
+
           }
           height: 60px;
           width: 75px;
