@@ -1,12 +1,16 @@
 <template>
   <div>
 
-    <div class="train-box" v-if="trainListData.length>0">
-      <div class="train-top" :class="{
+    <div class="train-box"  v-if="trainListData.length>0">
+      <div class="train-top"
+      :class="{
         'f-left':trainDirection===0,
         'f-right':trainDirection===1
-      }">
-        火车头
+      }"
+      >
+        <!-- <div class="train-top-box">
+
+        </div> -->
       </div>
       <div class="train-body" ref="trainBody">
         <div class="train-list-box" ref="trainListBox" @scroll="handleScroll" >
@@ -15,7 +19,8 @@
            :class="{
             'flex-row':trainDirection===0,
             'flex-row-reverse':trainDirection===1
-            }">
+            }"
+            >
             <li class="train-item-box"
             v-for="(item,index) in trainListData" :key="index"
             :class="{
@@ -42,6 +47,7 @@
                     class="carriage-item-wrapper"
 
                      >
+                     <template v-if="cItem.name">
                       <div class="carriage-item-wrapper-content">
                         <p>集装箱编号</p>
                         <div>
@@ -54,15 +60,49 @@
                           >
                         </div>
                       </div>
-
                       <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex">
                         <i class="h-icon-edit" @click.stop="editCarriage(item,index,cItem,cIndex)"></i>
                         <i class="h-icon-delete" @click.stop="deleteCarriage(index,cIndex)"></i>
                       </div>
+                     </template>
+                     <template v-else>
+                       <div class="empty-carriage-box">
+
+                          <el-popover
+                            :ref="'carriagePopover'+cIndex+'&'+index"
+                            placement="right"
+                            width="360"
+                            v-model="cItem.visible">
+                            <div>
+                              <div>
+                                <h3>添加集装箱</h3>
+                              </div>
+                              <el-form ref="carriageForm" label-position="top" :model="carriageForm" label-width="120px">
+                                <el-form-item label="集装箱编号" required>
+                                  <el-input v-model="carriageForm.carriageNum"></el-input>
+                                </el-form-item>
+
+                              </el-form>
+
+                            </div>
+                            <div style="text-align: right; margin: 0">
+                              <el-button type="primary" @click="sureAddCarriageBox(cIndex,cItem)">确 定</el-button>
+                              <el-button @click="cItem.visible = false;carriageForm.carriageNum=''">取 消</el-button>
+                            </div>
+                            <el-button slot="reference">+</el-button>
+                          </el-popover>
+                       </div>
+
+                     </template>
+
                     </div>
                   </div>
                 </div>
-                <div class="train-item-content" v-if="item.type">
+                <div class="train-item-content"
+                :class="{
+                  'isEditStatus':item.isEdit===true
+                  }"
+                 v-if="item.type">
                   <div class="train-item-save">
                     <el-button type="primary" v-if="item.isEdit" @click.stop="fnSaveEditTrainBoxData(item)">保存</el-button>
                   </div>
@@ -137,7 +177,7 @@
             <div class="add-carriage-wrapper"
              :class="[isShowPrevAddCarriage?'show':'hide']"
               @click.stop="addCarriage(true,0)">
-              +添加箱
+              <p>添加箱</p>
 
             </div>
           </div>
@@ -145,7 +185,7 @@
             <div class="add-carriage-wrapper "
             :class="[isShowPrevAddCarriage?'show':'hide']"
              @click.stop="addCarriage(true,1)">
-             +箱
+             <p>箱</p>
             </div>
 
           </div>
@@ -153,7 +193,8 @@
             <div class="add-carriage-wrapper"
             :class="[isShowAddCarriage?'show':'hide']"
              @click.stop="addCarriage(false,0)">
-              +添加箱
+
+             <p>添加箱</p>
             </div>
 
           </div>
@@ -270,9 +311,8 @@ export default {
       },
       trainListData: [],
       scrollLeft: 0,
-      isEditTrainBox: false,
       isCanClick: true,
-      trainBoxPopover: [
+      trainBoxPopover: [// 增加车厢popover
         {
           visible: false
         },
@@ -280,14 +320,21 @@ export default {
           visible: false
         }
       ],
-      trainForm: {
+      carriageForm: { // 增加集装箱的表单
+        carriageNum: ''
+      },
+      trainForm: { // 增加车厢的表单
         trainType: 'NX70',
         trainNum: '',
         selfWeight: '',
         loadWeight: ''
       }, // 新增加的火车车厢类型
-      trainTypeDialogVisible: false, // 增加车厢选择类型弹框显示
-      isTrainPrev: false // 是否向前追加火车车厢
+      newCarriageData: {
+        status: 1, // 集装箱status字段；1上报的异常集装箱；2正常上报的集装箱
+        name: '',
+        visible: false,
+        isEdit: false
+      }
 
     }
   },
@@ -365,6 +412,7 @@ export default {
         {
           status: 2,
           name: '第1集装箱',
+          visible: false,
           isEdit: false
         }
       ]
@@ -398,11 +446,13 @@ export default {
         {
           status: 2,
           name: '第2集装箱',
+          visible: false,
           isEdit: false
         },
         {
           status: 2,
           name: '第3集装箱',
+          visible: false,
           isEdit: false
         }
       ]
@@ -418,12 +468,14 @@ export default {
         {
           status: 2,
           name: '第4集装箱',
+          visible: false,
           isEdit: false
         },
         {
           status: 2,
           name: '第5集装箱',
-          isEdit: false
+          isEdit: false,
+          visible: false
         }
       ]
     },
@@ -445,6 +497,7 @@ export default {
         {
           status: 2,
           name: '第6集装箱',
+          visible: false,
           isEdit: false
         }
       ]
@@ -492,20 +545,23 @@ export default {
         this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - index * TRAINBOXWIDTH
       }
     },
-    // 增加车厢
-    addTrainBox (isPrev) {
-      this.trainTypeDialogVisible = true
-      this.isTrainPrev = isPrev
+    sureAddCarriageBox (cIndex, cItem) {
+      // 此处增加接口增加集装箱
+      cItem.name = this.carriageForm.carriageNum
+      this.carriageForm.carriageNum = ''
+      cItem.visible = false
     },
     sureAddTrainBox (index, item) {
+      // 表单验证并且传给后台
+      // 增加接口新增车厢
       const _this = this
       const trainItemData = {
         status: 2,
         type: this.trainForm.trainType,
-        name: '',
+        name: this.trainForm.trainNum,
         isEdit: false,
-        selfWeight: '',
-        loadWeight: '',
+        selfWeight: this.trainForm.selfWeight,
+        loadWeight: this.trainForm.loadWeight,
         box: []
       }
 
@@ -530,6 +586,12 @@ export default {
             _this.$refs.trainListBox.scrollLeft = _this.$refs.trainListBox.scrollLeft + 1
           })
         }
+      }
+      this.trainForm = {
+        trainType: 'NX70',
+        trainNum: '',
+        selfWeight: '',
+        loadWeight: ''
       }
       item.visible = false
       this.$emit('emitAddTrainBox', this.trainListData)
@@ -767,18 +829,36 @@ export default {
 <style scoped lang="less">
 @train-box-height:245px;
 @train-box-width:348px;
+@train-top-height:186px;
 @train-box-add-width:80px;
+@base-url-path:'./../assets/images/';
+.imgStyle{
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
 .train-box{
   height: 365px;
   padding-top: 80px;
   width:1200px;
   border: 3px solid #000;
+  // display: flex;
+  // align-items: flex-end;
   .train-top{
     float: left;
     width: 300px;
-    height:100%;
-    background: #ddd;
-    color: #fff;
+    height:@train-top-height;
+    margin-top: 100px;
+    .imgStyle();
+    background-image: url("@{base-url-path}/train-top.png");
+    &.f-right{
+      transform: scaleX(-1);
+    }
+  }
+  .flex-row{
+    flex-direction: row;
+  }
+  .flex-row-reverse{
+    flex-direction: row-reverse;
   }
   .f-left{
     float: left;
@@ -788,7 +868,7 @@ export default {
   }
   .train-body{
     float: left;
-    background: #999;
+    // background: #999;
     height: 100%;
     width: calc(~"100% - 300px");
     // overflow: auto;
@@ -844,6 +924,7 @@ export default {
       .add-carriage-box{
         width: 100%;
         height:80px;
+        padding-top:12px;
         // border: 1px solid #000;
         display: flex;
         justify-content: space-between;
@@ -852,16 +933,27 @@ export default {
           &.middle{
             width:28px;
             height:55px !important;
+            background-image: url("@{base-url-path}/add_carriage_small.png");
           }
           height: 60px;
           width: 75px;
           position: relative;
           display: inline-block;
           z-index: 1999;
+          cursor: pointer;
           .add-carriage-wrapper{
-            background: #ddd;
+            background-image: url("@{base-url-path}/add_carriage_big.png");
+
             height: 100%;
             width: 100%;
+
+            p{
+              height: 100%;
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
             &.show{
               display: block;
             }
@@ -880,14 +972,14 @@ export default {
         display: flex;
         justify-content: space-between;
         .add-train-item{
-          background: #f5f5f5;
+
           height:154px;
           width: @train-box-add-width;
           position: relative;
           z-index: 1999;
           .el-popover-wrap{
             .el-button{
-              background: #fff;
+              background-image: url("@{base-url-path}/add_train_box.png");
               height:154px;
               width:  @train-box-add-width;
               min-width: 20px;
@@ -902,35 +994,51 @@ export default {
     .train-item-box{
       &.P70{
         .train-item-content{
-          background: rgb(231, 106, 175) !important;
+          color:#fff ;
+          background-image: url("@{base-url-path}/train_boxcar.png") !important;
         }
       }
 
        &.NX70{
         .train-item-content{
-          background: rgb(227, 241, 195) !important;
+          color: rgba(0, 0, 0, .7);
+          background-image: url("@{base-url-path}/train_flatcar.png") !important;
         }
       }
       &.C70{
         .train-item-content{
-          background: rgb(136, 136, 228) !important;
+          color:#fff ;
+          background-image: url("@{base-url-path}/train_wagon.png") !important;
+        }
+      }
+       &.G70{
+        .train-item-content{
+           color: rgba(0, 0, 0, .7);
+          background-image: url("@{base-url-path}/train_tanker_nor.png") !important;
         }
       }
       .train-item-wrapper{
         height:@train-box-height;
         width:@train-box-width;
-        padding: 12px 16px 0 16px;
+        position: relative;
         &.curTop{
           position: relative;
           z-index: 1999;
-          border: 1px solid red;
+          background: rgba(30,127,255,0.08);
+          border-radius: 4px;
+          border: 2px solid #006FFF;
         }
         // border: 2px solid red;
         .carriage-box{
           // border: 2px solid #000;
-          height: 70px;
+          // height: 70px;
           width: 100%;
           overflow: hidden;
+          padding: 12px 16px 0 16px;
+          position: absolute;
+          top:0;
+          left: 0;
+          z-index: 200;
           &.float-row{
             .carriage-item{
               &:first-child{
@@ -963,11 +1071,20 @@ export default {
             height: 72px;
 
             .carriage-item-wrapper{
-              background: green;
-              color: #000;
+              background-image: url("@{base-url-path}/bg_carriage.png");
+              color: rgba(0, 0, 0, .4);
               width: 100%;
               height: 100%;
               display: flex;
+              .empty-carriage-box{
+                .el-popover-wrap{
+                  .el-button{
+                    width: 136px;
+                    height: 72px;
+                    background-image:  url("@{base-url-path}/bg_carriage.png") ;
+                  }
+                }
+              }
               .carriage-item-wrapper-content{
                 flex: 1;
               }
@@ -995,12 +1112,18 @@ export default {
           }
         }
         .train-item-content{
-          height: 156px;
-          width: 100%;
-          color: #000;
+          height: 186px;
+          width: 348px;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          z-index: 100;
           display: flex;
           align-items: center;
-          position: relative;
+          padding: 16px;
+          &.isEditStatus{
+            z-index: 201;
+          }
           .train-item-save{
             position: absolute;
             top:10px;

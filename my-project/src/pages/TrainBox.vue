@@ -42,13 +42,9 @@ export default {
       trainDirection: 0,
       trainListData: [],
       curActiveTrainIndex: 0,
-      needActiveTrainIndex: -1,
+      needActiveTrainIndex: -1
 
-      newCarriageData: {
-        status: 1, // 集装箱status字段；1上报的异常集装箱；2正常上报的集装箱
-        name: '',
-        isEdit: false
-      }
+      
     }
   },
   components: {
