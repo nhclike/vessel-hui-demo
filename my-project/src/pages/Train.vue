@@ -162,30 +162,55 @@
           'add-flex-row':trainDirection===0,
           'add-flex-row-reverse':trainDirection===1
         }">
-          <div class="add-train-item" @click="addTrainBox(true)">
-            +添加车
-          </div>
-          <div class="add-train-item"  @click="addTrainBox(false)">
-            +添加车
+          <div class="add-train-item" v-for="(item,index) in trainBoxPopover" :key="index">
+            <el-popover
+              :ref="'popover'+index"
+              placement="right"
+              width="360"
+              v-model="item.visible">
+              <div>
+                <div>
+                  <h3>添加火车</h3>
+                </div>
+                <el-form ref="trainForm" label-position="top" :model="trainForm" label-width="120px">
+                  <el-form-item label="火车编号" required>
+                    <el-input v-model="trainForm.trainNum"></el-input>
+                  </el-form-item>
+                  <el-form-item label="火车类型" required>
+                    <el-radio-group v-model="trainForm.trainType">
+                      <el-radio label="NX70">平车</el-radio>
+                      <el-radio label="P70">棚车</el-radio>
+                      <el-radio label="C70">敞车</el-radio>
+                      <el-radio label="G70">罐车</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                  <el-row>
+                    <el-col :span="12">
+                      <el-form-item label="载重" required>
+                        <el-input v-model="trainForm.loadWeight"></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="自重" required>
+                        <el-input v-model="trainForm.selfWeight"></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+
+              </div>
+              <div style="text-align: right; margin: 0">
+                <el-button type="primary" @click="sureAddTrainBox(index,item)">确 定</el-button>
+                <el-button @click="item.visible = false">取 消</el-button>
+              </div>
+              <el-button slot="reference">添加车</el-button>
+            </el-popover>
           </div>
         </div>
 
         </div>
       </div>
     </div>
-     <el-dialog title="选择火车类型" :visible.sync="trainTypeDialogVisible" :area="[480,300]">
-      请选择火车类型
-      <el-radio-group v-model="trainType">
-        <el-radio label="NX70">平车</el-radio>
-        <el-radio label="P70">棚车</el-radio>
-        <el-radio label="C70">敞车</el-radio>
-         <el-radio label="G70">gua车</el-radio>
-      </el-radio-group>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="sureAddTrainBox">确 定</el-button>
-        <el-button @click="trainTypeDialogVisible = false">取 消</el-button>
-      </span>
-    </el-dialog>
   </div>
 
 </template>
@@ -247,7 +272,20 @@ export default {
       scrollLeft: 0,
       isEditTrainBox: false,
       isCanClick: true,
-      trainType: 'NX70', // 新增加的火车车厢类型
+      trainBoxPopover: [
+        {
+          visible: false
+        },
+        {
+          visible: false
+        }
+      ],
+      trainForm: {
+        trainType: 'NX70',
+        trainNum: '',
+        selfWeight: '',
+        loadWeight: ''
+      }, // 新增加的火车车厢类型
       trainTypeDialogVisible: false, // 增加车厢选择类型弹框显示
       isTrainPrev: false // 是否向前追加火车车厢
 
@@ -459,37 +497,19 @@ export default {
       this.trainTypeDialogVisible = true
       this.isTrainPrev = isPrev
     },
-    sureAddTrainBox () {
+    sureAddTrainBox (index, item) {
       const _this = this
       const trainItemData = {
         status: 2,
-        type: this.trainType,
+        type: this.trainForm.trainType,
         name: '',
         isEdit: false,
         selfWeight: '',
         loadWeight: '',
         box: []
       }
-      // 加车厢不加集装箱
-      // if (this.trainType === 'P70') {
-      //   trainItemData = Object.assign(trainItemData, {
-      //     box: []
-      //   })
-      // } else {
-      //   trainItemData = Object.assign(trainItemData, {
-      //     box: [
-      //       {
-      //         type: 2,
-      //         name: '111'
-      //       },
-      //       {
-      //         type: 0,
-      //         name: ''
-      //       }
-      //     ]
-      //   })
-      // }
-      if (this.isTrainPrev) { // 向前添加
+
+      if (index === 0) { // 第一个添加车厢按钮
         const addIndex = this.curActiveTrainIndex
         this.trainListData.splice(addIndex, 0, trainItemData)
         if (this.trainDirection === 1) { // 反向
@@ -497,12 +517,12 @@ export default {
             _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft
           })
         }
-      } else {
+      } else { // 第二个添加车厢按钮
         const addIndex1 = this.curActiveTrainIndex + 1
         this.trainListData.splice(addIndex1, 0, trainItemData)
         if (this.trainDirection === 0) {
           this.$nextTick(() => {
-            _this.needActiveTrainIndex = _this.curActiveTrainIndex + 1
+            _this.$refs.trainListBox.scrollLeft = addIndex1 * TRAINBOXWIDTH
           })
         } else {
           this.$nextTick(() => {
@@ -511,7 +531,7 @@ export default {
           })
         }
       }
-      this.trainTypeDialogVisible = false
+      item.visible = false
       this.$emit('emitAddTrainBox', this.trainListData)
     },
     // 删除车厢
@@ -865,6 +885,16 @@ export default {
           width: @train-box-add-width;
           position: relative;
           z-index: 1999;
+          .el-popover-wrap{
+            .el-button{
+              background: #fff;
+              height:154px;
+              width:  @train-box-add-width;
+              min-width: 20px;
+              padding: 0;
+            }
+          }
+
         }
       }
     }
