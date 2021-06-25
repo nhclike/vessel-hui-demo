@@ -44,7 +44,6 @@ export default {
       curActiveTrainIndex: 0,
       needActiveTrainIndex: -1
 
-      
     }
   },
   components: {

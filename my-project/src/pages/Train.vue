@@ -410,7 +410,7 @@ export default {
       loadWeight: '1t',
       box: [
         {
-          status: 2,
+          status: 2, // 1异常2正常
           name: '第1集装箱',
           visible: false,
           isEdit: false
@@ -418,22 +418,13 @@ export default {
       ]
     },
     {
-      status: 2,
-      type: 'P70',
+      status: 2, // 1异常2正常
+      type: 'P70', // type为''为有集装箱无车厢数据的异常数据
       name: '第2节棚车',
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      box: []
-    },
-    {
-      status: 2,
-      type: 'P70',
-      name: '第3节棚车',
-      isEdit: false,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      box: []
+      box: []// 如果一个数据没有上报为[]
     },
     {
       status: 2,
@@ -545,12 +536,14 @@ export default {
         this.$refs.trainListBox.scrollLeft = this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - index * TRAINBOXWIDTH
       }
     },
+    // 确定新增集装名字
     sureAddCarriageBox (cIndex, cItem) {
       // 此处增加接口增加集装箱
       cItem.name = this.carriageForm.carriageNum
       this.carriageForm.carriageNum = ''
       cItem.visible = false
     },
+    // 确定新增车厢
     sureAddTrainBox (index, item) {
       // 表单验证并且传给后台
       // 增加接口新增车厢
@@ -567,7 +560,15 @@ export default {
 
       if (index === 0) { // 第一个添加车厢按钮
         const addIndex = this.curActiveTrainIndex
-        this.trainListData.splice(addIndex, 0, trainItemData)
+        if (this.trainListData[addIndex].type === '') {
+          const ndata = Object.assign(trainItemData, {
+            box: this.trainListData[addIndex].box
+          })
+          this.trainListData.splice(addIndex, 1, ndata)
+        } else {
+          this.trainListData.splice(addIndex, 0, trainItemData)
+        }
+
         if (this.trainDirection === 1) { // 反向
           this.$nextTick(() => {
             _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft
@@ -575,7 +576,15 @@ export default {
         }
       } else { // 第二个添加车厢按钮
         const addIndex1 = this.curActiveTrainIndex + 1
-        this.trainListData.splice(addIndex1, 0, trainItemData)
+        if (this.trainListData[addIndex1].type === '') { // 如果要增加的车厢位置上是一个异常增加集装箱导致的异常车厢，则增加车厢不是直接增加而是替换车厢数据
+          const ndata1 = Object.assign(trainItemData, {
+            box: this.trainListData[addIndex1].box
+          })
+          this.trainListData.splice(addIndex1, 1, ndata1)
+        } else {
+          this.trainListData.splice(addIndex1, 0, trainItemData)
+        }
+
         if (this.trainDirection === 0) {
           this.$nextTick(() => {
             _this.$refs.trainListBox.scrollLeft = addIndex1 * TRAINBOXWIDTH
@@ -790,6 +799,7 @@ export default {
         }
       }
     },
+    // 编辑集装箱
     editCarriage (item, index, cItem, cIndex) {
       const _this = this
       if (this.isCanClick) {
