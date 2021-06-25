@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <div class="train-box">
+    <div class="train-box" v-if="trainListData.length>0">
       <div class="train-top" :class="{
         'f-left':trainDirection===0,
         'f-right':trainDirection===1
@@ -42,35 +42,78 @@
                     class="carriage-item-wrapper"
 
                      >
-                      <span v-if="index!=curActiveTrainIndex||!cItem.isEdit">{{cItem.name}}</span>
-                      <input type="text"
-                      v-focus="true"
-                      v-if="index===curActiveTrainIndex&&cItem.isEdit"
-                      @blur="fnInputBlur(cItem)"
-                      v-model="cItem.name"
-                      >
-                      <template v-if="index===curActiveTrainIndex">
+                      <div class="carriage-item-wrapper-content">
+                        <p>集装箱编号</p>
+                        <div>
+                          <span v-if="index!=curActiveTrainIndex||!cItem.isEdit">{{cItem.name}}</span>
+                          <input type="text"
+                          v-focus="true"
+                          v-if="index===curActiveTrainIndex&&cItem.isEdit"
+                          @blur="fnInputBlur(cItem)"
+                          v-model="cItem.name"
+                          >
+                        </div>
+                      </div>
+
+                      <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex">
                         <i class="h-icon-edit" @click.stop="editCarriage(item,index,cItem,cIndex)"></i>
                         <i class="h-icon-delete" @click.stop="deleteCarriage(index,cIndex)"></i>
-                      </template>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="train-item-content">
-                  <div class="train-item-name">
-                    <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.name}}</span>
-                    <input v-focus="true"
-                      v-if="index===curActiveTrainIndex&&item.isEdit"
+                <div class="train-item-content" v-if="item.type">
+                  <div class="train-item-save">
+                    <el-button type="primary" v-if="item.isEdit" @click.stop="fnSaveEditTrainBoxData(item)">保存</el-button>
+                  </div>
+                  <div class="train-item-name" v-if="item.name">
+                    <div>火车编号</div>
+                    <div>
+                      <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.name}}</span>
+                      <input v-focus="true"
+                        v-if="index===curActiveTrainIndex&&item.isEdit"
 
-                      @blur="fnInputBlur(item)"
-                      type="text"
-                      v-model="item.name">
+                        type="text"
+                        v-model="item.name">
+                    </div>
+
+                  </div>
+                  <div class="train-item-info">
+                    <ul>
+                      <li>
+                        <span>类型</span>
+                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.type}}</span>
+                        <input
+                          v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                          type="text"
+                          v-model="item.type">
+                      </li>
+                      <li>
+                        <span>自重</span>
+                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.selfWeight}}</span>
+                        <input
+                          v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                          type="text"
+                          v-model="item.selfWeight">
+                      </li>
+                      <li>
+                        <span>载重</span>
+                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.loadWeight}}</span>
+                        <input
+                          v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                          type="text"
+                          v-model="item.loadWeight">
+                      </li>
+                    </ul>
                   </div>
 
-                  <template v-if="index===curActiveTrainIndex">
+                  <div class="train-item-opt" v-if="index===curActiveTrainIndex&&!item.isEdit">
                     <i class="h-icon-edit" @click.stop="editTrainBox(item,index)"></i>
                     <i class="h-icon-delete" @click.stop="deleteTrainBox(index)"></i>
-                  </template>
+                  </div>
 
                 </div>
               </div>
@@ -130,6 +173,19 @@
         </div>
       </div>
     </div>
+     <el-dialog title="选择火车类型" :visible.sync="trainTypeDialogVisible" :area="[480,300]">
+      请选择火车类型
+      <el-radio-group v-model="trainType">
+        <el-radio label="NX70">平车</el-radio>
+        <el-radio label="P70">棚车</el-radio>
+        <el-radio label="C70">敞车</el-radio>
+         <el-radio label="G70">gua车</el-radio>
+      </el-radio-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="sureAddTrainBox">确 定</el-button>
+        <el-button @click="trainTypeDialogVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -139,18 +195,42 @@ import { debounce } from '@/utils/utils'
 
 // 整体交互设计
 // 1通过改变scrollLeft动态计算当前激活车厢
+
+// 需求点
+// 1蓬车无集装箱
+// 集装箱状态
+// 1上报的集装箱数据，根据集装箱status分为1异常--上报2正常  其中1异常编辑后变为正常2
+
+// 车厢状态
+// 1上报的数据 1异常2正常
+
+// 车厢类型
+// const trainType = {
+//   NX70: '平车',
+//   P70: '蓬车',
+//   C70: '敞车'，
+//   G70:'罐车'
+// }
+
+// 多出来的集装箱下面没有车厢则车厢类型为'',也就是车厢类型为''的对应的集装箱数据是异常数据，此异常数据单独处理
+
+// 集装箱添加逻辑
+// 1根据添加按钮位置获得要操作的集装箱位置startLocation
+// 2判断startLocation的集装箱个数<2----添加集装箱到startLocation---startLocation位置上的数据后移一次---结束操作
+// 3location的集装箱个数===2
+// 4添加的集装箱到startLocation,startLocation的位置依次后移----跨车厢时for
+// 4.1判断车厢是否为蓬车
+// ---是---进入下次循环
+// ---否---4.2
+// 4.2判断车厢的集装箱个数循环2和3步骤
+// 4.3判断车厢是否存在
+// 4.3.1不存在则新增type为空的新车厢，并且将上个车厢的最后一个集装箱数据添加进来
 const TRAINBOXWIDTH = 428
 export default {
   props: {
     trainDirection: {
       type: Number,
       default: 0// 0正向从右向左/1反向从左到右
-    },
-    trainListData: {
-      type: Array,
-      default: () => {
-        return []
-      }
     },
     // 需要激活的火车车厢
     needActiveTrainIndex: {
@@ -163,9 +243,13 @@ export default {
       lastBlockBoxStyle: {
         paddingLeft: '200px'
       },
+      trainListData: [],
       scrollLeft: 0,
       isEditTrainBox: false,
-      isCanClick: true
+      isCanClick: true,
+      trainType: 'NX70', // 新增加的火车车厢类型
+      trainTypeDialogVisible: false, // 增加车厢选择类型弹框显示
+      isTrainPrev: false // 是否向前追加火车车厢
 
     }
   },
@@ -204,8 +288,9 @@ export default {
     }
   },
   watch: {
-    curActiveTrainIndex (newVal, oldVal) {
-      console.log('curActiveTrainIndex', newVal, oldVal)
+    scrollLeft (newVal, oldVal) {
+      console.log('scrollLeft', newVal, oldVal)
+      // 激活车厢改变，或者激活车厢未改变滚动改变都矫正位置
       // 矫正scrollLeft位置
       if (this.trainDirection === 0) {
         if (this.scrollLeft !== this.rowScrollLeft) {
@@ -216,6 +301,8 @@ export default {
           this.$refs.trainListBox.scrollLeft = this.rowReverseScrollLeft
         }
       }
+    },
+    curActiveTrainIndex (newVal, oldVal) {
       this.$emit('emitCurActiveTrainIndex', newVal)
     },
     needActiveTrainIndex (newVal, oldVal) {
@@ -228,9 +315,108 @@ export default {
   },
   mounted () {
     // console.log(this.$refs.trainOptBox, this.$refs.trainOptBox.clientWidth)
-    this.lastBlockBoxStyle = {
-      paddingLeft: this.$refs.trainListBox.clientWidth - this.$refs.trainOptBox.clientWidth + 'px'
-    }
+
+    this.trainListData = [{
+      status: 2,
+      type: 'NX70',
+      name: '第1节平车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: [
+        {
+          status: 2,
+          name: '第1集装箱',
+          isEdit: false
+        }
+      ]
+    },
+    {
+      status: 2,
+      type: 'P70',
+      name: '第2节棚车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: []
+    },
+    {
+      status: 2,
+      type: 'P70',
+      name: '第3节棚车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: []
+    },
+    {
+      status: 2,
+      type: 'C70',
+      name: '第4节敞车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: [
+        {
+          status: 2,
+          name: '第2集装箱',
+          isEdit: false
+        },
+        {
+          status: 2,
+          name: '第3集装箱',
+          isEdit: false
+        }
+      ]
+    },
+    {
+      status: 2,
+      type: 'C70',
+      name: '第5节敞车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: [
+        {
+          status: 2,
+          name: '第4集装箱',
+          isEdit: false
+        },
+        {
+          status: 2,
+          name: '第5集装箱',
+          isEdit: false
+        }
+      ]
+    },
+    {
+      type: 'NX70',
+      name: '第6节平车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: []
+    },
+    {
+      type: 'NX70',
+      name: '第7节平车',
+      isEdit: false,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      box: [
+        {
+          status: 2,
+          name: '第6集装箱',
+          isEdit: false
+        }
+      ]
+    }]
+    const _this = this
+    this.$nextTick(() => {
+      _this.lastBlockBoxStyle = {
+        paddingLeft: _this.$refs.trainListBox.clientWidth - _this.$refs.trainOptBox.clientWidth + 'px'
+      }
+    })
   },
   directives: {
     focus: {
@@ -252,7 +438,13 @@ export default {
     },
     // 编辑车厢
     editTrainBox (item, index) {
+      console.log('editTrainBox', item)
       item.isEdit = true
+    },
+    // 保存车厢编辑数据
+    fnSaveEditTrainBoxData (item) {
+      // 此处添加接口保存编辑数据
+      item.isEdit = false
     },
     // 选中那个车厢激活那个车厢
     fnclickTrainBox (index) {
@@ -264,7 +456,63 @@ export default {
     },
     // 增加车厢
     addTrainBox (isPrev) {
-      this.$emit('emitAddTrainBox', isPrev)
+      this.trainTypeDialogVisible = true
+      this.isTrainPrev = isPrev
+    },
+    sureAddTrainBox () {
+      const _this = this
+      const trainItemData = {
+        status: 2,
+        type: this.trainType,
+        name: '',
+        isEdit: false,
+        selfWeight: '',
+        loadWeight: '',
+        box: []
+      }
+      // 加车厢不加集装箱
+      // if (this.trainType === 'P70') {
+      //   trainItemData = Object.assign(trainItemData, {
+      //     box: []
+      //   })
+      // } else {
+      //   trainItemData = Object.assign(trainItemData, {
+      //     box: [
+      //       {
+      //         type: 2,
+      //         name: '111'
+      //       },
+      //       {
+      //         type: 0,
+      //         name: ''
+      //       }
+      //     ]
+      //   })
+      // }
+      if (this.isTrainPrev) { // 向前添加
+        const addIndex = this.curActiveTrainIndex
+        this.trainListData.splice(addIndex, 0, trainItemData)
+        if (this.trainDirection === 1) { // 反向
+          this.$nextTick(() => {
+            _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft
+          })
+        }
+      } else {
+        const addIndex1 = this.curActiveTrainIndex + 1
+        this.trainListData.splice(addIndex1, 0, trainItemData)
+        if (this.trainDirection === 0) {
+          this.$nextTick(() => {
+            _this.needActiveTrainIndex = _this.curActiveTrainIndex + 1
+          })
+        } else {
+          this.$nextTick(() => {
+            // 增加偏差触发handleScroll事件从而进一步触发curActiveTrainIndex计算属性，进而触发矫正计算
+            _this.$refs.trainListBox.scrollLeft = _this.$refs.trainListBox.scrollLeft + 1
+          })
+        }
+      }
+      this.trainTypeDialogVisible = false
+      this.$emit('emitAddTrainBox', this.trainListData)
     },
     // 删除车厢
     deleteTrainBox (index) {
@@ -272,7 +520,24 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         onConfirm: () => {
-          this.$emit('emitDeleteTrainBox', index)
+          this.trainListData.splice(index, 1)
+          const _this = this
+          if (this.trainDirection === 0) {
+            this.$nextTick(() => {
+              _this.curActiveTrainIndex = index
+            })
+          } else {
+            this.$nextTick(() => {
+              const sl = _this.$refs.trainListBox.scrollWidth - _this.$refs.trainBody.clientWidth - index * TRAINBOXWIDTH
+              console.log(sl)
+              _this.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
+            })
+          }
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.$emit('emitDeleteTrainBox', this.trainListData)
         },
         onCancel: () => {
           this.$message({
@@ -288,14 +553,171 @@ export default {
       if (this.isCanClick) {
         this.isCanClick = false
         setTimeout(function () {
-          _this.$emit('emitAddCarriage', isCur, index)
+          _this.fnAddCarriageOpt(isCur, index)
+          _this.$emit('emitAddCarriage', _this.trainListData)
           _this.isCanClick = true
         }, 500)
       }
     },
+    fnAddCarriageOpt (isCur, index) {
+      console.log('增加集装箱', index)
+
+      if (isCur) {
+        // 第一个添加
+        if (index === 0) {
+          this.fnAddCarriage(this.curActiveTrainIndex)
+        } else { // 第二个添加
+          let adata = {}
+          if (this.trainDirection === 0) {
+            adata = Object.assign(Object.assign({
+              location: 'right'
+            }, this.newCarriageData))
+          } else {
+            adata = Object.assign(Object.assign({
+              location: 'left'
+            }, this.newCarriageData))
+          }
+          if (this.trainListData[this.curActiveTrainIndex].box.length === 0) {
+            this.trainListData[this.curActiveTrainIndex].box = [adata]
+            // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
+            // this.trainListData[this.curActiveTrainIndex].box = [Object.assign({}, this.newCarriageData)]
+          } else if (this.trainListData[this.curActiveTrainIndex].box.length === 1) {
+            // 点击中间添加集装箱，激活车厢只有一个集装箱场景有2种
+            // 1当前集装箱是第一步点击中间添加集装箱按钮添加的集装箱（包含location特殊标识）
+            // 2当前集装箱是上报上来的集装箱或者点击第一个添加集装箱按钮添加的集装箱（正常）
+            if (this.trainListData[this.curActiveTrainIndex].box[0].location) {
+              // 场景1中第二次点击中间添加按钮结果
+              // 保持当前激活车厢集装箱length仍然为1
+              delete this.trainListData[this.curActiveTrainIndex].box[0].location
+              const lldata = this.trainListData[this.curActiveTrainIndex].box[0]
+              this.trainListData[this.curActiveTrainIndex].box = [adata]
+              const nnext = this.curActiveTrainIndex + 1
+              this.nextAdd(nnext, lldata)
+            } else {
+              this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
+            }
+          } else {
+            const ldata = this.trainListData[this.curActiveTrainIndex].box[1]
+            this.trainListData[this.curActiveTrainIndex].box = [this.trainListData[this.curActiveTrainIndex].box[0], Object.assign({}, this.newCarriageData)]
+            // 思路
+            // 中间添加和最后一个添加区别仅在于
+            // 中间添加按钮的后一个集装箱处理和最后一个添加，添加的是空数据而此时的模拟最后一个添加添加的是前一个车厢的最后一个数据
+            const next = this.curActiveTrainIndex + 1
+            this.nextAdd(next, ldata)// 模拟触发第三个集装箱增加过程，处理如果下个车厢是蓬车则后延
+          }
+        }
+      } else {
+        // 第三个添加
+
+        this.fnAddCarriage(this.curActiveTrainIndex + 1)
+      }
+    },
+    // 模拟触发第三个增加集装箱事件
+    nextAdd (next, ldata) {
+      if (!this.trainListData[next] || this.trainListData[next].type !== 'P70') { //! this.trainListData[next]是在最后一个车厢有2个集装箱的时候点击中间添加集装箱按钮边界处理
+        this.fnAddCarriage(next, ldata)
+      } else {
+        next++
+        this.nextAdd(next, ldata)
+      }
+    },
+    // 有空位场景
+    fnCurLengthLT2 (startLocation, lastVal) {
+      const lData = lastVal || Object.assign({}, this.newCarriageData)
+      if (this.trainListData[startLocation].box.length === 0) {
+        this.trainListData[startLocation].box = [lData]
+      } else if (this.trainListData[startLocation].box.length === 1) {
+        // if (this.trainListData[startLocation].box[0].location) {
+        //   delete this.trainListData[startLocation].box[0].location
+        // }
+        const midVal = this.trainListData[startLocation].box[0]
+        this.trainListData[startLocation].box = [lData, midVal]
+      }
+    },
+    // 从每个车厢的第一个集装箱处开始添加集装箱
+    fnAddCarriage (startLocation, addData) { // addData决定首位添加的是空数据还是前一个车厢的最后一个集装箱数据
+      const recordTrainData = []
+      const _this = this
+      // let firstOpt = startLocation
+      for (let i = startLocation; i <= this.trainListData.length; i++) {
+        if (!this.trainListData[i]) {
+          this.$confirm('此操作将产生无车厢的集装箱, 是否继续?', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            onConfirm: () => {
+              this.trainListData.push({
+                status: 2,
+                type: '', // 错误状态的车厢（无车厢type）
+                name: '',
+                isEdit: false,
+                box: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
+              })
+              if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
+                this.$nextTick(() => {
+                  _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft
+                })
+              }
+            },
+            onCancel: () => {
+              this.$message({
+                type: 'success',
+                message: '已取消删除!'
+              })
+            }
+          })
+
+          break
+        }
+        if (this.trainListData[i].type === 'P70') { // 碰到棚车直接跳过
+          // firstOpt = i + 1
+          continue
+        }
+        if (this.trainListData[i].box.length < 2) { // 碰到有空位置的场景
+          if (i === startLocation) { // 首次操作的车厢
+            if (addData) {
+              this.fnCurLengthLT2(startLocation, addData)
+            } else {
+              this.fnCurLengthLT2(startLocation)
+            }
+          } else {
+            this.fnCurLengthLT2(i, recordTrainData[1])
+          }
+
+          break
+        }
+
+        if (this.trainListData[i].box.length === 2) {
+          // 思路
+          // 1取出第一个集装箱保存
+          // 2第一个集装箱存放；如果是第一个操作车厢则放空值,否则放上个车厢最后一个值
+          // 3第二个集装箱放值之前先取出记录保存，再给第二个集装箱放之前保存的第一个集装箱
+          if (this.trainListData[i].box[0].location) {
+            delete this.trainListData[i].box[0].location
+          }
+          if (this.trainListData[i].box[1].location) {
+            delete this.trainListData[i].box[1].location
+          }
+          recordTrainData[0] = this.trainListData[i].box[0]
+          if (i === startLocation) {
+            this.trainListData[i].box[0] = addData || Object.assign({}, this.newCarriageData)
+          } else {
+            this.trainListData[i].box[0] = recordTrainData[1]
+          }
+          recordTrainData[1] = this.trainListData[i].box[1]
+          this.trainListData[i].box[1] = recordTrainData[0]
+        }
+      }
+    },
     editCarriage (item, index, cItem, cIndex) {
-      console.log('editCarriage', cItem)
-      item.box[cIndex].isEdit = true
+      const _this = this
+      if (this.isCanClick) {
+        this.isCanClick = false
+        setTimeout(function () {
+          console.log('editCarriage', cItem)
+          cItem.isEdit = true
+          _this.isCanClick = true
+        }, 500)
+      }
     },
     // 删除集装箱
     deleteCarriage (index, cIndex) {
@@ -303,7 +725,12 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         onConfirm: () => {
-          this.$emit('emitDeleteCarriage', index, cIndex)
+          this.trainListData[index].box.splice(cIndex, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.$emit('emitDeleteCarriage', this.trainListData)
         },
         onCancel: () => {
           this.$message({
@@ -470,7 +897,7 @@ export default {
         }
         // border: 2px solid red;
         .carriage-box{
-          border: 2px solid #000;
+          // border: 2px solid #000;
           height: 70px;
           width: 100%;
           overflow: hidden;
@@ -510,6 +937,22 @@ export default {
               color: #000;
               width: 100%;
               height: 100%;
+              display: flex;
+              .carriage-item-wrapper-content{
+                flex: 1;
+              }
+              .carriage-item-wrapper-opt{
+                width: 30px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                i{
+                  font-size: 24px;
+                  cursor: pointer;
+                }
+              }
               input{
                 width: 100%;
                 min-width: 30px;
@@ -518,19 +961,45 @@ export default {
               }
 
             }
-            i{
-              font-size: 24px;
-            }
+
           }
         }
         .train-item-content{
           height: 156px;
           width: 100%;
           color: #000;
-          i{
-            font-size: 30px;
+          display: flex;
+          align-items: center;
+          position: relative;
+          .train-item-save{
+            position: absolute;
+            top:10px;
+            left: 10px;
           }
+          .train-item-info{
+            width: 138px;
+            ul{
+              li{
+                margin: 10px 0;
+                input{
+                  width: 50px;
+                  min-width: 30px;
+                  display: inline-block;
+                  height: 30px;
+                }
+              }
+            }
+          }
+          .train-item-opt{
+            width: 30px;
+            height: 90px;
+            i{
+              font-size: 24px;
+            }
+          }
+
           .train-item-name{
+            flex: 1;
             span{
               min-width: 60px;
               display: inline-block;
