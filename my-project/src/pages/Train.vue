@@ -314,10 +314,10 @@ export default {
       isCanClick: true,
       trainBoxPopover: [// 增加车厢popover
         {
-          visible: 0
+          visible: false
         },
         {
-          visible: 0
+          visible: false
         }
       ],
       carriageForm: { // 增加集装箱的表单
@@ -340,7 +340,7 @@ export default {
       newCarriageData: {
         containerStatus: 1, // 集装箱containerStatus字段；1上报的异常集装箱；2正常上报的集装箱
         containerNum: '',
-        visible: 0,
+        visible: false,
         isEdit: 0
       }
 
@@ -414,7 +414,7 @@ export default {
     // console.log(this.$refs.trainOptBox, this.$refs.trainOptBox.clientWidth)
 
     this.trainListData = [{
-      trainStatus: 2,
+      trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第1节平车',
       isEdit: 0,
@@ -422,15 +422,15 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 2, // 1异常2正常
+          containerStatus: 1, // 1异常2正常
           containerNum: '第1集装箱',
-          visible: 0,
+          visible: false,
           isEdit: 0
         }
       ]
     },
     {
-      trainStatus: 2, // 1异常2正常
+      trainStatus: 1, // 1异常2正常
       trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
       trainNo: '第2节棚车',
       isEdit: 0,
@@ -439,7 +439,7 @@ export default {
       containerInfo: []// 如果一个数据没有上报为[]
     },
     {
-      trainStatus: 2,
+      trainStatus: 1,
       trainType: 'C70',
       trainNo: '第4节敞车',
       isEdit: 0,
@@ -447,21 +447,21 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 2,
+          containerStatus: 1,
           containerNum: '第2集装箱',
-          visible: 0,
+          visible: false,
           isEdit: 0
         },
         {
-          containerStatus: 2,
+          containerStatus: 1,
           containerNum: '第3集装箱',
-          visible: 0,
+          visible: false,
           isEdit: 0
         }
       ]
     },
     {
-      trainStatus: 2,
+      trainStatus: 1,
       trainType: 'C70',
       trainNo: '第5节敞车',
       isEdit: 0,
@@ -469,16 +469,16 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 2,
+          containerStatus: 1,
           containerNum: '第4集装箱',
-          visible: 0,
+          visible: false,
           isEdit: 0
         },
         {
-          containerStatus: 2,
+          containerStatus: 1,
           containerNum: '第5集装箱',
           isEdit: 0,
-          visible: 0
+          visible: false
         }
       ]
     },
@@ -498,9 +498,9 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 2,
+          containerStatus: 1,
           containerNum: '第6集装箱',
-          visible: 0,
+          visible: false,
           isEdit: 0
         }
       ]
@@ -532,7 +532,7 @@ export default {
         if (arr[i].containerInfo) {
           for (let j = 0; j < arr[i].containerInfo.length; j++) {
             if (arr[i].containerInfo[j].visible) {
-              arr[i].containerInfo[j].visible = 0
+              arr[i].containerInfo[j].visible = false
               break
             }
           }
@@ -574,7 +574,7 @@ export default {
           // 此处增加接口增加集装箱
           cItem.containerNum = this.carriageForm.carriageNum
           this.carriageForm.carriageNum = ''
-          cItem.visible = 0
+          cItem.visible = false
         }
       } catch (error) {
 
@@ -613,14 +613,14 @@ export default {
     resetForm (formName, item) {
       this.$refs[formName][0].resetFields()
       if (item && item.visible) {
-        item.visible = 0
+        item.visible = false
       }
     },
     // 确定新增车厢
     sureAddTrainBox (index, item) {
       const _this = this
       const trainItemData = {
-        trainStatus: 2,
+        trainStatus: 1,
         trainType: this.trainForm.trainType,
         trainNo: this.trainForm.trainNum,
         isEdit: 0,
@@ -675,7 +675,7 @@ export default {
         loadWeight: ''
       }
       // 添加popover隐藏
-      item.visible = 0
+      item.visible = false
       this.$emit('emitAddTrainBox', this.trainListData)
     },
     // 删除车厢
@@ -814,7 +814,7 @@ export default {
             cancelButtonText: '取消',
             onConfirm: () => {
               this.trainListData.push({
-                trainStatus: 2,
+                trainStatus: 1,
                 trainType: '', // 错误状态的车厢（无车厢type）
                 trainNo: '',
                 isEdit: 0,
