@@ -314,10 +314,10 @@ export default {
       isCanClick: true,
       trainBoxPopover: [// 增加车厢popover
         {
-          visible: false
+          visible: 0
         },
         {
-          visible: false
+          visible: 0
         }
       ],
       carriageForm: { // 增加集装箱的表单
@@ -340,8 +340,8 @@ export default {
       newCarriageData: {
         containerStatus: 1, // 集装箱containerStatus字段；1上报的异常集装箱；2正常上报的集装箱
         containerNum: '',
-        visible: false,
-        isEdit: false
+        visible: 0,
+        isEdit: 0
       }
 
     }
@@ -417,15 +417,15 @@ export default {
       trainStatus: 2,
       trainType: 'NX70',
       trainNo: '第1节平车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
         {
           containerStatus: 2, // 1异常2正常
           containerNum: '第1集装箱',
-          visible: false,
-          isEdit: false
+          visible: 0,
+          isEdit: 0
         }
       ]
     },
@@ -433,7 +433,7 @@ export default {
       trainStatus: 2, // 1异常2正常
       trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
       trainNo: '第2节棚车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: []// 如果一个数据没有上报为[]
@@ -442,21 +442,21 @@ export default {
       trainStatus: 2,
       trainType: 'C70',
       trainNo: '第4节敞车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第2集装箱',
-          visible: false,
-          isEdit: false
+          visible: 0,
+          isEdit: 0
         },
         {
           containerStatus: 2,
           containerNum: '第3集装箱',
-          visible: false,
-          isEdit: false
+          visible: 0,
+          isEdit: 0
         }
       ]
     },
@@ -464,28 +464,28 @@ export default {
       trainStatus: 2,
       trainType: 'C70',
       trainNo: '第5节敞车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第4集装箱',
-          visible: false,
-          isEdit: false
+          visible: 0,
+          isEdit: 0
         },
         {
           containerStatus: 2,
           containerNum: '第5集装箱',
-          isEdit: false,
-          visible: false
+          isEdit: 0,
+          visible: 0
         }
       ]
     },
     {
       trainType: 'NX70',
       trainNo: '第6节平车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: []
@@ -493,15 +493,15 @@ export default {
     {
       trainType: 'NX70',
       trainNo: '第7节平车',
-      isEdit: false,
+      isEdit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第6集装箱',
-          visible: false,
-          isEdit: false
+          visible: 0,
+          isEdit: 0
         }
       ]
     }]
@@ -532,7 +532,7 @@ export default {
         if (arr[i].containerInfo) {
           for (let j = 0; j < arr[i].containerInfo.length; j++) {
             if (arr[i].containerInfo[j].visible) {
-              arr[i].containerInfo[j].visible = false
+              arr[i].containerInfo[j].visible = 0
               break
             }
           }
@@ -542,7 +542,7 @@ export default {
     },
     fnInputBlur (item) {
       // console.log(item)
-      item.isEdit = false
+      item.isEdit = 0
     },
     // 编辑车厢
     editTrainBox (item, index) {
@@ -574,7 +574,7 @@ export default {
           // 此处增加接口增加集装箱
           cItem.containerNum = this.carriageForm.carriageNum
           this.carriageForm.carriageNum = ''
-          cItem.visible = false
+          cItem.visible = 0
         }
       } catch (error) {
 
@@ -613,7 +613,7 @@ export default {
     resetForm (formName, item) {
       this.$refs[formName][0].resetFields()
       if (item && item.visible) {
-        item.visible = false
+        item.visible = 0
       }
     },
     // 确定新增车厢
@@ -623,7 +623,7 @@ export default {
         trainStatus: 2,
         trainType: this.trainForm.trainType,
         trainNo: this.trainForm.trainNum,
-        isEdit: false,
+        isEdit: 0,
         selfWeight: this.trainForm.selfWeight,
         loadWeight: this.trainForm.loadWeight,
         containerInfo: []
@@ -675,7 +675,7 @@ export default {
         loadWeight: ''
       }
       // 添加popover隐藏
-      item.visible = false
+      item.visible = 0
       this.$emit('emitAddTrainBox', this.trainListData)
     },
     // 删除车厢
@@ -817,7 +817,7 @@ export default {
                 trainStatus: 2,
                 trainType: '', // 错误状态的车厢（无车厢type）
                 trainNo: '',
-                isEdit: false,
+                isEdit: 0,
                 containerInfo: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
               })
               if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
