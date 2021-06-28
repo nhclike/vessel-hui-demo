@@ -100,7 +100,8 @@
                 </div>
                 <div class="train-item-content"
                 :class="{
-                  'isEditStatus':item.isEdit===true
+                  'isEditStatus':item.isEdit===true,
+                  'error':item.trainStatus===0
                   }"
                  v-if="item.trainType">
                   <div class="train-item-save">
@@ -207,11 +208,11 @@
             <el-popover
               :ref="'popover'+index"
               placement="right"
-              width="360"
+              width="320"
               v-model="item.visible">
               <div>
                 <div>
-                  <h3>添加火车</h3>
+                  <span class="popover-header-title">添加火车</span>
                 </div>
                 <el-form :ref="'trainForm'+index" :rules="trainRules" label-position="top" :model="trainForm" label-width="120px">
                   <el-form-item label="火车编号" prop="trainNum">
@@ -422,7 +423,7 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 1, // 1异常2正常
+          containerStatus: 1, //   0异常1正常
           containerNum: '第1集装箱',
           visible: false,
           isEdit: 0
@@ -430,7 +431,7 @@ export default {
       ]
     },
     {
-      trainStatus: 1, // 1异常2正常
+      trainStatus: 1, //  0异常1正常
       trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
       trainNo: '第2节棚车',
       isEdit: 0,
@@ -439,7 +440,16 @@ export default {
       containerInfo: []// 如果一个数据没有上报为[]
     },
     {
-      trainStatus: 1,
+      trainStatus: 0, // 0异常1正常
+      trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
+      trainNo: '第2节棚车',
+      isEdit: 0,
+      selfWeight: '1t',
+      loadWeight: '1t',
+      containerInfo: []// 如果一个数据没有上报为[]
+    },
+    {
+      trainStatus: 0,
       trainType: 'C70',
       trainNo: '第4节敞车',
       isEdit: 0,
@@ -483,6 +493,7 @@ export default {
       ]
     },
     {
+      trainStatus: 0,
       trainType: 'NX70',
       trainNo: '第6节平车',
       isEdit: 0,
@@ -491,6 +502,7 @@ export default {
       containerInfo: []
     },
     {
+      trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第7节平车',
       isEdit: 0,
@@ -923,6 +935,19 @@ export default {
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
+.el-popover{
+  .popover-header-title{
+    width: 72px;
+    height: 26px;
+    font-family: MicrosoftYaHeiUI;
+    font-size: 18px;
+    color: rgba(0,0,0,0.70);
+    letter-spacing: 0;
+    line-height: 26px;
+    font-weight: 400;
+    margin-bottom: 24px;
+  }
+}
 .train-box{
   height: 365px;
   padding-top: 80px;
@@ -1019,13 +1044,13 @@ export default {
         .add-carriage-item{
           &.middle{
              width:28px;
-            height:55px !important;
-          .add-carriage-wrapper{
-            width: 100%;
-            height: 100%;
-            background-image: url("@{base-url-path}/add_carriage_small.png");
+            height:60px !important;
+            .add-carriage-wrapper{
+              width: 100%;
+              height: 100%;
+              background-image: url("@{base-url-path}/add_carriage_small.png");
 
-          }
+            }
 
           }
           height: 60px;
@@ -1046,6 +1071,7 @@ export default {
               display: flex;
               align-items: center;
               justify-content: center;
+
             }
             &.show{
               display: block;
@@ -1087,6 +1113,10 @@ export default {
     .train-item-box{
       &.P70{
         .train-item-content{
+          &.error{
+            color:#FA3239 ;
+             background-image: url("@{base-url-path}/train_boxcar_wrong.png") !important;
+          }
           color:#fff ;
           background-image: url("@{base-url-path}/train_boxcar.png") !important;
         }
@@ -1094,21 +1124,36 @@ export default {
 
        &.NX70{
         .train-item-content{
+          &.error{
+            color:#FA3239 ;
+             background-image: url("@{base-url-path}/train_flatcar_wrong.png") !important;
+          }
           color: rgba(0, 0, 0, .7);
           background-image: url("@{base-url-path}/train_flatcar.png") !important;
         }
+
       }
       &.C70{
         .train-item-content{
+          &.error{
+            color:#FA3239 ;
+             background-image: url("@{base-url-path}/train_wagon_wrong.png") !important;
+          }
           color:#fff ;
           background-image: url("@{base-url-path}/train_wagon.png") !important;
         }
+
       }
        &.G70{
         .train-item-content{
+          &.error{
+            color:#FA3239 ;
+             background-image: url("@{base-url-path}/train_tanker_wrong.png") !important;
+          }
            color: rgba(0, 0, 0, .7);
           background-image: url("@{base-url-path}/train_tanker_nor.png") !important;
         }
+
       }
       .train-item-wrapper{
         height:@train-box-height;
@@ -1116,7 +1161,7 @@ export default {
         position: relative;
         &.curTop{
           position: relative;
-          z-index: 1999;
+
           background: rgba(30,127,255,0.08);
           border-radius: 4px;
           border: 2px solid #006FFF;
@@ -1180,6 +1225,30 @@ export default {
               }
               .carriage-item-wrapper-content{
                 flex: 1;
+                padding: 12px 0 12px 12px;
+                p{
+                  width: 70px;
+                  height: 20px;
+                  font-size: 14px;
+                  color: rgba(0,0,0,0.40);
+                  letter-spacing: 0;
+                  line-height: 20px;
+                  font-weight: 400;
+                  margin-bottom: 4px;
+                }
+                div{
+                  span{
+                    width: 90px;
+                    height: 20px;
+                    font-family: YOUSHEhaoshenti;
+                    font-size: 14px;
+                    color: rgba(0,0,0,0.70);
+                    letter-spacing: 0;
+                    text-align: center;
+                    line-height: 20px;
+                    font-weight: 400;
+                  }
+                }
               }
               .carriage-item-wrapper-opt{
                 width: 30px;
@@ -1188,6 +1257,8 @@ export default {
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                position: relative;
+                z-index: 2000;
                 i{
                   font-size: 24px;
                   cursor: pointer;
@@ -1210,35 +1281,51 @@ export default {
           position: absolute;
           bottom: 0;
           left: 0;
-          z-index: 100;
           display: flex;
           align-items: center;
           padding: 16px;
           &.isEditStatus{
-            z-index: 201;
+            z-index: 2001;
+            height:223px ;
+            background-color: #ddd;
+            background-position: 0 40px;
+            background-repeat: no-repeat;
           }
           .train-item-save{
             position: absolute;
-            top:10px;
-            left: 10px;
+            top:17px;
+            right: 15px;
           }
           .train-item-info{
-            width: 138px;
+            width: 120px;
             ul{
               li{
-                margin: 10px 0;
+                margin: 6px 0;
+                span{
+                  &:first-child{
+                    width: 28px;
+                    height: 20px;
+                    font-size: 14px;
+                    letter-spacing: 0;
+                    line-height: 20px;
+                    font-weight: 400;
+                    margin-right: 8px;
+                  }
+                }
                 input{
-                  width: 50px;
+                  width: 72px;
                   min-width: 30px;
                   display: inline-block;
-                  height: 30px;
+                  height: 24px;
                 }
               }
             }
           }
           .train-item-opt{
-            width: 30px;
+            width: 36px;
             height: 90px;
+            position: relative;
+            z-index: 2000;
             i{
               font-size: 24px;
             }
@@ -1246,6 +1333,31 @@ export default {
 
           .train-item-name{
             flex: 1;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            div{
+              &:first-child{
+                height: 20px;
+                opacity: 0.7;
+                font-size: 14px;
+                letter-spacing: 0;
+                line-height: 20px;
+                font-weight: 400;
+                width: 134px;
+                text-align: left;
+              }
+              &:nth-child(2){
+                height: 32px;
+                width: 134px;
+                font-size: 22px;
+                letter-spacing: 0;
+                text-align: left;
+                line-height: 20px;
+                font-weight: 400;
+              }
+            }
             span{
               min-width: 60px;
               display: inline-block;
@@ -1254,7 +1366,8 @@ export default {
             input{
               min-width: 60px;
               display: inline-block;
-              height: 30px;
+              height: 36px;
+              width: 134px;
             }
           }
         }
