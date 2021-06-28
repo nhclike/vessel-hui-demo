@@ -77,8 +77,8 @@
                               <div>
                                 <h3>添加集装箱</h3>
                               </div>
-                              <el-form ref="carriageForm" label-position="top" :model="carriageForm" label-width="120px">
-                                <el-form-item label="集装箱编号" required>
+                              <el-form :ref="'carriageForm'+cIndex+'&'+index" label-position="top" :rules="carriageRules" :model="carriageForm" label-width="120px">
+                                <el-form-item label="集装箱编号" prop="carriageNum">
                                   <el-input v-model="carriageForm.carriageNum"></el-input>
                                 </el-form-item>
 
@@ -86,8 +86,8 @@
 
                             </div>
                             <div style="text-align: right; margin: 0">
-                              <el-button type="primary" @click="sureAddCarriageBox(cIndex,cItem)">确 定</el-button>
-                              <el-button @click="cItem.visible = false;carriageForm.carriageNum=''">取 消</el-button>
+                              <el-button type="primary" @click="sureAddCarriageBox(cItem,'carriageForm'+cIndex+'&'+index)">确 定</el-button>
+                              <el-button @click="fnCancelAddCarriage('carriageForm'+cIndex+'&'+index,cItem)">取 消</el-button>
                             </div>
                             <el-button slot="reference">+</el-button>
                           </el-popover>
@@ -213,11 +213,11 @@
                 <div>
                   <h3>添加火车</h3>
                 </div>
-                <el-form ref="trainForm" label-position="top" :model="trainForm" label-width="120px">
-                  <el-form-item label="火车编号" required>
+                <el-form :ref="'trainForm'+index" :rules="trainRules" label-position="top" :model="trainForm" label-width="120px">
+                  <el-form-item label="火车编号" prop="trainNum">
                     <el-input v-model="trainForm.trainNum"></el-input>
                   </el-form-item>
-                  <el-form-item label="火车类型" required>
+                  <el-form-item label="火车类型" prop="trainType">
                     <el-radio-group v-model="trainForm.trainType">
                       <el-radio label="NX70">平车</el-radio>
                       <el-radio label="P70">棚车</el-radio>
@@ -227,12 +227,12 @@
                   </el-form-item>
                   <el-row>
                     <el-col :span="12">
-                      <el-form-item label="载重" required>
+                      <el-form-item label="载重" prop="loadWeight">
                         <el-input v-model="trainForm.loadWeight"></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                      <el-form-item label="自重" required>
+                      <el-form-item label="自重" prop="selfWeight">
                         <el-input v-model="trainForm.selfWeight"></el-input>
                       </el-form-item>
                     </el-col>
@@ -241,8 +241,8 @@
 
               </div>
               <div style="text-align: right; margin: 0">
-                <el-button type="primary" @click="sureAddTrainBox(index,item)">确 定</el-button>
-                <el-button @click="item.visible = false">取 消</el-button>
+                <el-button type="primary" @click="submitAddTrainBoxForm(index,item,'trainForm'+index)">确 定</el-button>
+                <el-button @click="resetForm('trainForm'+index,item)">取 消</el-button>
               </div>
               <el-button slot="reference">添加车</el-button>
             </el-popover>
@@ -258,7 +258,6 @@
 
 <script>
 import { debounce } from '@/utils/utils'
-import func from 'vue-editor-bridge'
 
 // 整体交互设计
 // 1通过改变scrollLeft动态计算当前激活车厢
@@ -324,12 +323,20 @@ export default {
       carriageForm: { // 增加集装箱的表单
         carriageNum: ''
       },
+      carriageRules: {
+        carriageNum: { required: true, message: '集装箱编号必填', trigger: 'blur' }
+      },
       trainForm: { // 增加车厢的表单
         trainType: 'NX70',
         trainNum: '',
         selfWeight: '',
         loadWeight: ''
       }, // 新增加的火车车厢类型
+      trainRules: {
+        trainNum: { required: true, message: '车厢编号必填', trigger: 'blur' },
+        selfWeight: [{ required: true, message: '自重必填', trigger: 'blur' }],
+        loadWeight: [{ required: true, message: '载重必填', trigger: 'blur' }]
+      },
       newCarriageData: {
         containerStatus: 1, // 集装箱containerStatus字段；1上报的异常集装箱；2正常上报的集装箱
         containerNum: '',
@@ -357,19 +364,18 @@ export default {
       return index
     },
     rowScrollLeft () {
-      let _this=this
-      return function(index){
-        let i=index||_this.curActiveTrainIndex
+      const _this = this
+      return function (index) {
+        const i = index || _this.curActiveTrainIndex
         return i * TRAINBOXWIDTH
       }
     },
     rowReverseScrollLeft () {
-       let _this=this
-      return function(index){
-        let i=index||_this.curActiveTrainIndex
+      const _this = this
+      return function (index) {
+        const i = index || _this.curActiveTrainIndex
         return this.$refs.trainListBox.scrollWidth - this.$refs.trainBody.clientWidth - i * TRAINBOXWIDTH
       }
-      
     },
     isShowPrevAddCarriage () {
       return this.trainListData[this.curActiveTrainIndex].trainType !== 'P70'
@@ -385,7 +391,7 @@ export default {
   watch: {
     scrollLeft (newVal, oldVal) {
       console.log('scrollLeft', newVal, oldVal)
-      
+
       // 矫正scrollLeft位置
       if (this.trainDirection === 0) {
         if (this.scrollLeft !== this.rowScrollLeft()) {
@@ -414,7 +420,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[
+      containerInfo: [
         {
           containerStatus: 2, // 1异常2正常
           containerNum: '第1集装箱',
@@ -430,7 +436,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[]// 如果一个数据没有上报为[]
+      containerInfo: []// 如果一个数据没有上报为[]
     },
     {
       trainStatus: 2,
@@ -439,7 +445,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[
+      containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第2集装箱',
@@ -461,7 +467,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[
+      containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第4集装箱',
@@ -482,7 +488,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[]
+      containerInfo: []
     },
     {
       trainType: 'NX70',
@@ -490,7 +496,7 @@ export default {
       isEdit: false,
       selfWeight: '1t',
       loadWeight: '1t',
-      containerInfo:[
+      containerInfo: [
         {
           containerStatus: 2,
           containerNum: '第6集装箱',
@@ -517,9 +523,23 @@ export default {
   methods: {
     handleScroll: debounce(function () {
       console.log('handleScroll', this.$refs.trainListBox.scrollWidth)
+      // 滚动过程中有carriagePopover未隐藏的场景
+      this.changeCarriagePopover(this.trainListData)
       this.scrollLeft = this.$refs.trainListBox.scrollLeft
     }, 500),
-
+    changeCarriagePopover  (arr) {
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].containerInfo) {
+          for (let j = 0; j < arr[i].containerInfo.length; j++) {
+            if (arr[i].containerInfo[j].visible) {
+              arr[i].containerInfo[j].visible = false
+              break
+            }
+          }
+        }
+      }
+      return -1
+    },
     fnInputBlur (item) {
       // console.log(item)
       item.isEdit = false
@@ -542,17 +562,62 @@ export default {
         this.$refs.trainListBox.scrollLeft = this.rowReverseScrollLeft(index)
       }
     },
-    // 确定新增集装名字
-    sureAddCarriageBox (cIndex, cItem) {
-      // 此处增加接口增加集装箱
-      cItem.containerNum = this.carriageForm.carriageNum
+    fnCancelAddCarriage (formName, citem) {
       this.carriageForm.carriageNum = ''
-      cItem.visible = false
+      this.resetForm(formName, citem)
+    },
+    // 确定新增集装名字
+    async sureAddCarriageBox (cItem, formName) {
+      try {
+        const vFlag = await this.submitForm(formName)
+        if (vFlag) {
+          // 此处增加接口增加集装箱
+          cItem.containerNum = this.carriageForm.carriageNum
+          this.carriageForm.carriageNum = ''
+          cItem.visible = false
+        }
+      } catch (error) {
+
+      }
+    },
+    // 新增车厢表单提交
+    async submitAddTrainBoxForm (index, item, formName) {
+      try {
+        // 表单验证并且传给后台
+        const vFlag = await this.submitForm(formName)
+        console.log(vFlag)
+        // 增加接口新增车厢
+        if (vFlag) {
+          this.sureAddTrainBox(index, item)
+        }
+      } catch (error) {
+
+      }
+    },
+    submitForm (formName) {
+      // eslint-disable-next-line promise/param-names
+      const _this = this
+      return new Promise((resolve, reject) => {
+        this.$refs[formName][0].validate((valid, invalidFields) => {
+          if (valid) {
+            resolve(true)
+          } else {
+            console.log('error submit!!')
+            console.log(invalidFields)
+            _this.$refs[formName][0].focusFirstField()
+            reject(new Error('valid failed'))
+          }
+        })
+      })
+    },
+    resetForm (formName, item) {
+      this.$refs[formName][0].resetFields()
+      if (item && item.visible) {
+        item.visible = false
+      }
     },
     // 确定新增车厢
     sureAddTrainBox (index, item) {
-      // 表单验证并且传给后台
-      // 增加接口新增车厢
       const _this = this
       const trainItemData = {
         trainStatus: 2,
@@ -561,7 +626,7 @@ export default {
         isEdit: false,
         selfWeight: this.trainForm.selfWeight,
         loadWeight: this.trainForm.loadWeight,
-        containerInfo:[]
+        containerInfo: []
       }
 
       if (index === 0) { // 第一个添加车厢按钮
@@ -602,14 +667,14 @@ export default {
           })
         }
       }
-      //表单数据重置
+      // 表单数据重置
       this.trainForm = {
         trainType: 'NX70',
         trainNum: '',
         selfWeight: '',
         loadWeight: ''
       }
-      //添加popover隐藏
+      // 添加popover隐藏
       item.visible = false
       this.$emit('emitAddTrainBox', this.trainListData)
     },
@@ -628,7 +693,7 @@ export default {
           } else {
             this.$nextTick(() => {
               const sl = _this.rowReverseScrollLeft(index)
-              console.log("deleteTrainBox---sl",sl)
+              console.log('deleteTrainBox---sl', sl)
               _this.$refs.trainListBox.scrollLeft = sl < 0 ? 1 : sl // 反向最后一个车厢删除，临界值处理
             })
           }
@@ -668,13 +733,13 @@ export default {
         } else { // 第二个添加
           let adata = {}
           if (this.trainDirection === 0) {
-            adata = Object.assign( this.newCarriageData,{
+            adata = Object.assign({
               location: 'right'
-            })
+            }, this.newCarriageData)
           } else {
-            adata =  Object.assign( this.newCarriageData,{
+            adata = Object.assign({
               location: 'left'
-            })
+            }, this.newCarriageData)
           }
           if (this.trainListData[this.curActiveTrainIndex].containerInfo.length === 0) {
             this.trainListData[this.curActiveTrainIndex].containerInfo = [adata]
@@ -684,19 +749,23 @@ export default {
             // 点击中间添加集装箱，激活车厢只有一个集装箱场景有2种
             // 1当前集装箱是第一步点击中间添加集装箱按钮添加的集装箱（包含location特殊标识）
             // 2当前集装箱是上报上来的集装箱或者点击第一个添加集装箱按钮添加的集装箱（正常）
-            if (this.trainListData[this.curActiveTrainIndex].containerInfo[0].location) {
+            const lldata = this.trainListData[this.curActiveTrainIndex].containerInfo[0]
+            if (lldata.location) {
               // 场景1中第二次点击中间添加按钮结果
               // 保持当前激活车厢集装箱length仍然为1
-              delete this.trainListData[this.curActiveTrainIndex].containerInfo[0].location
-              const lldata = this.trainListData[this.curActiveTrainIndex].containerInfo[0]
+              delete lldata.location
+
               this.trainListData[this.curActiveTrainIndex].containerInfo = [adata]
               const nnext = this.curActiveTrainIndex + 1
               this.nextAdd(nnext, lldata)
             } else {
-              this.trainListData[this.curActiveTrainIndex].containerInfo = [this.trainListData[this.curActiveTrainIndex].containerInfo[0], Object.assign({}, this.newCarriageData)]
+              this.trainListData[this.curActiveTrainIndex].containerInfo = [lldata, Object.assign({}, this.newCarriageData)]
             }
           } else {
             const ldata = this.trainListData[this.curActiveTrainIndex].containerInfo[1]
+            if (ldata.location) {
+              delete ldata.location
+            }
             this.trainListData[this.curActiveTrainIndex].containerInfo = [this.trainListData[this.curActiveTrainIndex].containerInfo[0], Object.assign({}, this.newCarriageData)]
             // 思路
             // 中间添加和最后一个添加区别仅在于
@@ -749,7 +818,7 @@ export default {
                 trainType: '', // 错误状态的车厢（无车厢type）
                 trainNo: '',
                 isEdit: false,
-                containerInfo:[recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
+                containerInfo: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
               })
               if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
                 this.$nextTick(() => {
