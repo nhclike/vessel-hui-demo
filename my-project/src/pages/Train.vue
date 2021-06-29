@@ -45,7 +45,9 @@
                     v-for="(cItem,cIndex) in item.containerInfo" :key="cIndex">
                     <div
                     class="carriage-item-wrapper"
-
+                    :class="{
+                      'error':cItem.containerStatus===0
+                      }"
                      >
                      <template v-if="cItem.containerNum">
                       <div class="carriage-item-wrapper-content">
@@ -108,53 +110,55 @@
                   <div class="train-item-save">
                     <el-button type="primary" v-if="item.isEdit" @click.stop="fnSaveEditTrainBoxData(item)">保存</el-button>
                   </div>
-                  <div class="train-item-name" v-if="item.trainNo">
-                    <div>火车编号</div>
-                    <div>
-                      <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainNo}}</span>
-                      <input v-focus="true"
-                        v-if="index===curActiveTrainIndex&&item.isEdit"
+                  <div class="train-item-content-wrapper">
+                    <div class="train-item-name" v-if="item.trainNo">
+                      <div>火车编号</div>
+                      <div>
+                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainNo}}</span>
+                        <input v-focus="true"
+                          v-if="index===curActiveTrainIndex&&item.isEdit"
 
-                        type="text"
-                        v-model="item.trainNo">
+                          type="text"
+                          v-model="item.trainNo">
+                      </div>
+
+                    </div>
+                    <div class="train-item-info">
+                      <ul>
+                        <li>
+                          <span>类型</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainType}}</span>
+                          <input
+                            v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                            type="text"
+                            v-model="item.trainType">
+                        </li>
+                        <li>
+                          <span>自重</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.selfWeight}}</span>
+                          <input
+                            v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                            type="text"
+                            v-model="item.selfWeight">
+                        </li>
+                        <li>
+                          <span>载重</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.loadWeight}}</span>
+                          <input
+                            v-if="index===curActiveTrainIndex&&item.isEdit"
+
+                            type="text"
+                            v-model="item.loadWeight">
+                        </li>
+                      </ul>
                     </div>
 
-                  </div>
-                  <div class="train-item-info">
-                    <ul>
-                      <li>
-                        <span>类型</span>
-                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainType}}</span>
-                        <input
-                          v-if="index===curActiveTrainIndex&&item.isEdit"
-
-                          type="text"
-                          v-model="item.trainType">
-                      </li>
-                      <li>
-                        <span>自重</span>
-                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.selfWeight}}</span>
-                        <input
-                          v-if="index===curActiveTrainIndex&&item.isEdit"
-
-                          type="text"
-                          v-model="item.selfWeight">
-                      </li>
-                      <li>
-                        <span>载重</span>
-                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.loadWeight}}</span>
-                        <input
-                          v-if="index===curActiveTrainIndex&&item.isEdit"
-
-                          type="text"
-                          v-model="item.loadWeight">
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div class="train-item-opt" v-if="index===curActiveTrainIndex&&!item.isEdit">
-                    <i class="h-icon-edit" @click.stop="editTrainBox(item,index)"></i>
-                    <i class="h-icon-delete" @click.stop="deleteTrainBox(index)"></i>
+                    <div class="train-item-opt" v-if="index===curActiveTrainIndex&&!item.isEdit">
+                      <i class="h-icon-edit" @click.stop="editTrainBox(item,index)"></i>
+                      <i class="h-icon-delete" @click.stop="deleteTrainBox(index)"></i>
+                    </div>
                   </div>
 
                 </div>
@@ -293,7 +297,7 @@ import { debounce } from '@/utils/utils'
 // 4.2判断车厢的集装箱个数循环2和3步骤
 // 4.3判断车厢是否存在
 // 4.3.1不存在则新增type为空的新车厢，并且将上个车厢的最后一个集装箱数据添加进来
-const TRAINBOXWIDTH = 433
+const TRAINBOXWIDTH = 464
 export default {
   props: {
     trainDirection: {
@@ -311,7 +315,8 @@ export default {
       lastBlockBoxStyle: {
         paddingLeft: '200px'
       },
-      trainListData: [],
+      trainListData: [], // 正常车箱列表数据
+      errorCarriageListData: [], // 错误集装箱列表数据，储存有集装箱没有车厢的错误集装箱
       scrollLeft: 0,
       isCanClick: true,
       trainBoxPopover: [// 增加车厢popover
@@ -414,8 +419,34 @@ export default {
   },
   mounted () {
     // console.log(this.$refs.trainOptBox, this.$refs.trainOptBox.clientWidth)
-
-    this.trainListData = [{
+    this.errorCarriageListData = [
+      {
+        trainContentId: -1,
+        id: '8888888888',
+        containerStatus: 0, //   0异常1正常
+        containerNum: '第8集装箱',
+        visible: false,
+        isEdit: 0
+      },
+      {
+        trainContentId: -1,
+        id: '9999999999',
+        containerStatus: 0, //   0异常1正常
+        containerNum: '第9集装箱',
+        visible: false,
+        isEdit: 0
+      },
+      {
+        trainContentId: -1,
+        id: 'aaaaaaaaaa',
+        containerStatus: 0, //   0异常1正常
+        containerNum: '第a集装箱',
+        visible: false,
+        isEdit: 0
+      }
+    ]
+    const trainListData = [{
+      id: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
       trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第1节平车',
@@ -424,7 +455,9 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
-          containerStatus: 1, //   0异常1正常
+          trainContentId: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
+          id: '1111111111',
+          containerStatus: 0, //   0异常1正常
           containerNum: '第1集装箱',
           visible: false,
           isEdit: 0
@@ -450,6 +483,7 @@ export default {
       containerInfo: []// 如果一个数据没有上报为[]
     },
     {
+      id: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
       trainStatus: 0,
       trainType: 'C70',
       trainNo: '第4节敞车',
@@ -458,12 +492,16 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
+          trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
+          id: '2222222222',
           containerStatus: 1,
           containerNum: '第2集装箱',
           visible: false,
           isEdit: 0
         },
         {
+          trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
+          id: '3333333333',
           containerStatus: 1,
           containerNum: '第3集装箱',
           visible: false,
@@ -472,6 +510,8 @@ export default {
       ]
     },
     {
+      id: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+
       trainStatus: 1,
       trainType: 'C70',
       trainNo: '第5节敞车',
@@ -480,12 +520,16 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
+          trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+          id: '4444444444',
           containerStatus: 1,
           containerNum: '第4集装箱',
           visible: false,
           isEdit: 0
         },
         {
+          trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+          id: '5555555555',
           containerStatus: 1,
           containerNum: '第5集装箱',
           isEdit: 0,
@@ -503,6 +547,8 @@ export default {
       containerInfo: []
     },
     {
+      id: '75a7a546-b3ba-4800-97fc-819b2367743a',
+
       trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第7节平车',
@@ -511,6 +557,8 @@ export default {
       loadWeight: '1t',
       containerInfo: [
         {
+          trainContentId: '75a7a546-b3ba-4800-97fc-819b2367743a',
+          id: '6666666666',
           containerStatus: 1,
           containerNum: '第6集装箱',
           visible: false,
@@ -518,10 +566,39 @@ export default {
         }
       ]
     }]
+
+    // 重组异常数据
+    for (let i = 0; i < Math.ceil(this.errorCarriageListData.length / 2); i++) {
+      const gid = this.guid()
+      const errdata = [...this.errorCarriageListData]
+      const spliceData = errdata.splice(i * 2, 2)
+      const newData = {
+        id: gid,
+        trainStatus: 0,
+        trainType: '',
+        trainNo: '',
+        isEdit: 0,
+        selfWeight: '',
+        loadWeight: '',
+        containerInfo: []
+
+      }
+      for (let j = 0; j < spliceData.length; j++) {
+        newData.containerInfo.push(Object.assign(spliceData[j], {
+          trainContentId: gid
+        }))
+        continue
+      }
+      console.log(spliceData, newData)
+
+      trainListData.push(newData)
+      continue
+    }
+    this.trainListData = trainListData
     const _this = this
     this.$nextTick(() => {
       _this.lastBlockBoxStyle = {
-        paddingLeft: _this.$refs.trainListBox.clientWidth - _this.$refs.trainOptBox.clientWidth + 'px'
+        paddingLeft: _this.$refs.trainListBox.clientWidth - _this.$refs.trainOptBox.clientWidth - 34 + 'px'
       }
     })
   },
@@ -552,6 +629,9 @@ export default {
         }
       }
       return -1
+    },
+    guid () {
+      return Number(Math.random().toString().substr(3, 3) + Date.now()).toString(36)
     },
     fnInputBlur (item) {
       // console.log(item)
@@ -633,6 +713,7 @@ export default {
     sureAddTrainBox (index, item) {
       const _this = this
       const trainItemData = {
+        id: this.guid(), // 新增接口返回的id
         trainStatus: 1,
         trainType: this.trainForm.trainType,
         trainNo: this.trainForm.trainNum,
@@ -1003,11 +1084,11 @@ export default {
       .flex-row{
         flex-direction: row;
         .train-item-box{
-          padding-right: @train-box-add-width;
-          margin-left: 1px;
+          padding-right: calc(~ '@{train-box-add-width} + 2px');
+          margin-right: 34px;
 
           &:first-child{
-            padding-left: @train-box-add-width;
+            padding-left: calc(~ '@{train-box-add-width} + 6px');
           }
 
         }
@@ -1015,10 +1096,10 @@ export default {
       .flex-row-reverse{
         flex-direction: row-reverse;
         .train-item-box{
-          padding-left: @train-box-add-width;
-          margin-right: 1px;
+          padding-left: calc(~ '@{train-box-add-width} + 6px');
+          margin-left: 34px;
           &:first-child{
-            padding-right: @train-box-add-width;
+            padding-right: calc(~ '@{train-box-add-width} + 2px');
           }
 
         }
@@ -1026,7 +1107,7 @@ export default {
     }
     //操作区域
     .train-opt-box{
-      width: 522px;
+      width: 516px;
       height: calc(~"100% - 30px");
       // border: 1px solid red;
       position: relative;
@@ -1118,58 +1199,82 @@ export default {
       &.P70{
         .train-item-content{
           &.error{
-            color:#FA3239 ;
-             background-image: url("@{base-url-path}/train_boxcar_wrong.png") !important;
+            .train-item-content-wrapper{
+              color:#FA3239 ;
+              background-image: url("@{base-url-path}/train_boxcar_wrong.png") !important;
+            }
+
           }
-          color:#fff ;
-          background-image: url("@{base-url-path}/train_boxcar.png") !important;
+          .train-item-content-wrapper{
+            color:#fff ;
+           background-image: url("@{base-url-path}/train_boxcar.png") !important;
+          }
+
         }
       }
 
        &.NX70{
         .train-item-content{
           &.error{
-            color:#FA3239 ;
-             background-image: url("@{base-url-path}/train_flatcar_wrong.png") !important;
+            .train-item-content-wrapper{
+              color:#FA3239 ;
+              background-image: url("@{base-url-path}/train_flatcar_wrong.png") !important;
+            }
+
           }
-          color: rgba(0, 0, 0, .7);
-          background-image: url("@{base-url-path}/train_flatcar.png") !important;
+          .train-item-content-wrapper{
+            color: rgba(0, 0, 0, .7);
+            background-image: url("@{base-url-path}/train_flatcar.png") !important;
+          }
+
         }
 
       }
       &.C70{
         .train-item-content{
           &.error{
-            color:#FA3239 ;
-             background-image: url("@{base-url-path}/train_wagon_wrong.png") !important;
+            .train-item-content-wrapper{
+              color:#FA3239 ;
+              background-image: url("@{base-url-path}/train_wagon_wrong.png") !important;
+            }
+
           }
-          color:#fff ;
-          background-image: url("@{base-url-path}/train_wagon.png") !important;
+          .train-item-content-wrapper{
+            color:#fff ;
+            background-image: url("@{base-url-path}/train_wagon.png") !important;
+          }
+
         }
 
       }
        &.G70{
         .train-item-content{
           &.error{
-            color:#FA3239 ;
-             background-image: url("@{base-url-path}/train_tanker_wrong.png") !important;
+            .train-item-content-wrapper{
+              color:#FA3239 ;
+              background-image: url("@{base-url-path}/train_tanker_wrong.png") !important;
+            }
+
           }
-           color: rgba(0, 0, 0, .7);
-          background-image: url("@{base-url-path}/train_tanker_nor.png") !important;
+          .train-item-content-wrapper{
+            color: rgba(0, 0, 0, .7);
+            background-image: url("@{base-url-path}/train_tanker_nor.png") !important;
+          }
+
         }
 
       }
       .train-item-wrapper{
-        height:calc(~ '@{train-box-height} + 4px');
-        width:calc(~ '@{train-box-width} + 4px');
+        height:@train-box-height;
+        width:@train-box-width;
         border: 2px solid transparent;
         position: relative;
         &.curTop{
           position: relative;
-
-          background: rgba(30,127,255,0.08);
+          background-image: url('@{base-url-path}/train_box_select_bg.png');
+          background-size:100% 100%;
           border-radius: 4px;
-          border: 2px solid #006FFF;
+          // border: 2px solid #006FFF;
         }
         // border: 2px solid red;
         .carriage-box{
@@ -1219,6 +1324,10 @@ export default {
               width: 100%;
               height: 100%;
               display: flex;
+              &.error{
+                 background-image: url("@{base-url-path}/bg_carriage_error.png") !important;
+
+              }
               .empty-carriage-box{
                 .el-popover-wrap{
                   .el-button{
@@ -1290,14 +1399,19 @@ export default {
           &.isEditStatus{
             z-index: 2001;
             height:223px ;
-            background-color: #ddd;
-            background-position: 0 40px;
-            background-repeat: no-repeat;
+            background: rgba(30,127,255,0.08);
           }
           .train-item-save{
             position: absolute;
             top:17px;
             right: 15px;
+          }
+          .train-item-content-wrapper{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 186px;
+            right: 0;
           }
           .train-item-opt{
             width: 36px;
@@ -1313,7 +1427,7 @@ export default {
           .train-item-info{
             width: 128px;
             position: absolute;
-            bottom: 80px;
+            bottom: 69px;
             right: 0;
             ul{
               li{
@@ -1341,7 +1455,7 @@ export default {
 
           .train-item-name{
             position: absolute;
-            bottom: 90px;
+            bottom: 82px;
             left: 66px;
             flex: 1;
             display: inline-flex;
