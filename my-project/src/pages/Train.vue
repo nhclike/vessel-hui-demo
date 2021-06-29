@@ -844,37 +844,71 @@ export default {
               location: 'left'
             }, this.newCarriageData)
           }
+          if (this.trainListData[this.curActiveTrainIndex].trainType === '') {
+            this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              onConfirm: () => {
+
+              },
+              onCancel: () => {
+                this.$message({
+                  trainType: 'success',
+                  message: '已取消删除!'
+                })
+              }
+            })
+            return false
+          }
           if (this.trainListData[this.curActiveTrainIndex].containerInfo.length === 0) {
             this.trainListData[this.curActiveTrainIndex].containerInfo = [adata]
             // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
             // this.trainListData[this.curActiveTrainIndex].containerInfo = [Object.assign({}, this.newCarriageData)]
-          } else if (this.trainListData[this.curActiveTrainIndex].containerInfo.length === 1) {
+          } else {
+            if (this.trainListData[this.curActiveTrainIndex + 1] && this.trainListData[this.curActiveTrainIndex + 1].trainType === '') {
+              this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                onConfirm: () => {
+
+                },
+                onCancel: () => {
+                  this.$message({
+                    trainType: 'success',
+                    message: '已取消删除!'
+                  })
+                }
+              })
+              return false
+            }
+            if (this.trainListData[this.curActiveTrainIndex].containerInfo.length === 1) {
             // 点击中间添加集装箱，激活车厢只有一个集装箱场景有2种
             // 1当前集装箱是第一步点击中间添加集装箱按钮添加的集装箱（包含location特殊标识）
             // 2当前集装箱是上报上来的集装箱或者点击第一个添加集装箱按钮添加的集装箱（正常）
-            const lldata = this.trainListData[this.curActiveTrainIndex].containerInfo[0]
-            if (lldata.location) {
+              const lldata = this.trainListData[this.curActiveTrainIndex].containerInfo[0]
+              if (lldata.location) {
               // 场景1中第二次点击中间添加按钮结果
               // 保持当前激活车厢集装箱length仍然为1
-              delete lldata.location
+                delete lldata.location
 
-              this.trainListData[this.curActiveTrainIndex].containerInfo = [adata]
-              const nnext = this.curActiveTrainIndex + 1
-              this.nextAdd(nnext, lldata)
+                this.trainListData[this.curActiveTrainIndex].containerInfo = [adata]
+                const nnext = this.curActiveTrainIndex + 1
+                this.nextAdd(nnext, lldata)
+              } else {
+                this.trainListData[this.curActiveTrainIndex].containerInfo = [lldata, Object.assign({}, this.newCarriageData)]
+              }
             } else {
-              this.trainListData[this.curActiveTrainIndex].containerInfo = [lldata, Object.assign({}, this.newCarriageData)]
+              const ldata = this.trainListData[this.curActiveTrainIndex].containerInfo[1]
+              if (ldata.location) {
+                delete ldata.location
+              }
+              this.trainListData[this.curActiveTrainIndex].containerInfo = [this.trainListData[this.curActiveTrainIndex].containerInfo[0], Object.assign({}, this.newCarriageData)]
+              // 思路
+              // 中间添加和最后一个添加区别仅在于
+              // 中间添加按钮的后一个集装箱处理和最后一个添加，添加的是空数据而此时的模拟最后一个添加添加的是前一个车厢的最后一个数据
+              const next = this.curActiveTrainIndex + 1
+              this.nextAdd(next, ldata)// 模拟触发第三个集装箱增加过程，处理如果下个车厢是蓬车则后延
             }
-          } else {
-            const ldata = this.trainListData[this.curActiveTrainIndex].containerInfo[1]
-            if (ldata.location) {
-              delete ldata.location
-            }
-            this.trainListData[this.curActiveTrainIndex].containerInfo = [this.trainListData[this.curActiveTrainIndex].containerInfo[0], Object.assign({}, this.newCarriageData)]
-            // 思路
-            // 中间添加和最后一个添加区别仅在于
-            // 中间添加按钮的后一个集装箱处理和最后一个添加，添加的是空数据而此时的模拟最后一个添加添加的是前一个车厢的最后一个数据
-            const next = this.curActiveTrainIndex + 1
-            this.nextAdd(next, ldata)// 模拟触发第三个集装箱增加过程，处理如果下个车厢是蓬车则后延
           }
         }
       } else {
@@ -911,7 +945,7 @@ export default {
       // const _this = this
       // let firstOpt = startLocation
       for (let i = startLocation; i <= this.trainListData.length; i++) {
-        if (!this.trainListData[i]) {
+        if (!this.trainListData[i] || this.trainListData[i].trainType === '') {
           this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
@@ -1345,10 +1379,10 @@ export default {
             }
           }
           .f-right{
-            right: 16px !important;
+            left: 196px !important;
           }
           .f-left{
-            left: 16px !important;
+            right: 196px !important;
           }
           .carriage-item{
             position: absolute;
