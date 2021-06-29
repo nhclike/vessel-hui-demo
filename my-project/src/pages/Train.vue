@@ -844,6 +844,7 @@ export default {
               location: 'left'
             }, this.newCarriageData)
           }
+          // 针对当前添加位置的车厢为空的场景
           if (this.trainListData[this.curActiveTrainIndex].trainType === '') {
             this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
               confirmButtonText: '确定',
@@ -865,6 +866,7 @@ export default {
             // 此处的this.newCarriageData必须深拷贝下，否则会导致编辑集装箱name会改变this.newCarriageData的值，因为指向一样
             // this.trainListData[this.curActiveTrainIndex].containerInfo = [Object.assign({}, this.newCarriageData)]
           } else {
+            // 针对添加位置后面车厢为空的场景
             if (this.trainListData[this.curActiveTrainIndex + 1] && this.trainListData[this.curActiveTrainIndex + 1].trainType === '') {
               this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
                 confirmButtonText: '确定',
@@ -1148,10 +1150,10 @@ export default {
       .flex-row-reverse{
         flex-direction: row-reverse;
         .train-item-box{
-          padding-left: calc(~ '@{train-box-add-width} + 6px');
+          padding-left: calc(~ '@{train-box-add-width} + 2px');
           margin-left: 34px;
           &:first-child{
-            padding-right: calc(~ '@{train-box-add-width} + 2px');
+            padding-right: calc(~ '@{train-box-add-width} + 6px');
           }
         }
       }
