@@ -31,7 +31,7 @@
             }" >
               <div class="train-item-wrapper"
               :class="{'curTop':index===curActiveTrainIndex}"
-              @click.stop="fnclickTrainBox(index)" >
+              >
                 <!-- 集装箱 -->
                 <div class="carriage-box"  :class="{
                         'float-row':trainDirection===0,
@@ -99,6 +99,7 @@
                   </div>
                 </div>
                 <div class="train-item-content"
+                @click.stop="fnclickTrainBox(index)"
                 :class="{
                   'isEditStatus':item.isEdit===true,
                   'error':item.trainStatus===0
@@ -292,7 +293,7 @@ import { debounce } from '@/utils/utils'
 // 4.2判断车厢的集装箱个数循环2和3步骤
 // 4.3判断车厢是否存在
 // 4.3.1不存在则新增type为空的新车厢，并且将上个车厢的最后一个集装箱数据添加进来
-const TRAINBOXWIDTH = 428
+const TRAINBOXWIDTH = 433
 export default {
   props: {
     trainDirection: {
@@ -659,7 +660,7 @@ export default {
         }
       } else { // 第二个添加车厢按钮
         const addIndex1 = this.curActiveTrainIndex + 1
-        if (this.trainListData[addIndex1].trainType === '') { // 如果要增加的车厢位置上是一个异常增加集装箱导致的异常车厢，则增加车厢不是直接增加而是替换车厢数据
+        if (this.trainListData[addIndex1] && this.trainListData[addIndex1].trainType === '') { // 如果要增加的车厢位置上是一个异常增加集装箱导致的异常车厢，则增加车厢不是直接增加而是替换车厢数据
           const ndata1 = Object.assign(trainItemData, {
             containerInfo: this.trainListData[addIndex1].containerInfo
           })
@@ -817,26 +818,26 @@ export default {
     // 从每个车厢的第一个集装箱处开始添加集装箱
     fnAddCarriage (startLocation, addData) { // addData决定首位添加的是空数据还是前一个车厢的最后一个集装箱数据
       const recordTrainData = []
-      const _this = this
+      // const _this = this
       // let firstOpt = startLocation
       for (let i = startLocation; i <= this.trainListData.length; i++) {
         if (!this.trainListData[i]) {
-          this.$confirm('此操作将产生无车厢的集装箱, 是否继续?', {
+          this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             onConfirm: () => {
-              this.trainListData.push({
-                trainStatus: 1,
-                trainType: '', // 错误状态的车厢（无车厢type）
-                trainNo: '',
-                isEdit: 0,
-                containerInfo: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
-              })
-              if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
-                this.$nextTick(() => {
-                  _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft(this.curActiveTrainIndex)
-                })
-              }
+              // this.trainListData.push({
+              //   trainStatus: 1,
+              //   trainType: '', // 错误状态的车厢（无车厢type）
+              //   trainNo: '',
+              //   isEdit: 0,
+              //   containerInfo: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
+              // })
+              // if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
+              //   this.$nextTick(() => {
+              //     _this.$refs.trainListBox.scrollLeft = _this.rowReverseScrollLeft(this.curActiveTrainIndex)
+              //   })
+              // }
             },
             onCancel: () => {
               this.$message({
@@ -1003,6 +1004,7 @@ export default {
         flex-direction: row;
         .train-item-box{
           padding-right: @train-box-add-width;
+          margin-left: 1px;
 
           &:first-child{
             padding-left: @train-box-add-width;
@@ -1014,6 +1016,7 @@ export default {
         flex-direction: row-reverse;
         .train-item-box{
           padding-left: @train-box-add-width;
+          margin-right: 1px;
           &:first-child{
             padding-right: @train-box-add-width;
           }
@@ -1023,7 +1026,7 @@ export default {
     }
     //操作区域
     .train-opt-box{
-      width: @train-box-width+@train-box-add-width*2;
+      width: 522px;
       height: calc(~"100% - 30px");
       // border: 1px solid red;
       position: relative;
@@ -1098,6 +1101,7 @@ export default {
           z-index: 1999;
           .el-popover-wrap{
             .el-button{
+              border: none;
               background-image: url("@{base-url-path}/add_train_box.png");
               height:154px;
               width:  @train-box-add-width;
@@ -1156,8 +1160,9 @@ export default {
 
       }
       .train-item-wrapper{
-        height:@train-box-height;
-        width:@train-box-width;
+        height:calc(~ '@{train-box-height} + 4px');
+        width:calc(~ '@{train-box-width} + 4px');
+        border: 2px solid transparent;
         position: relative;
         &.curTop{
           position: relative;
@@ -1217,6 +1222,7 @@ export default {
               .empty-carriage-box{
                 .el-popover-wrap{
                   .el-button{
+                    border: none;
                     width: 136px;
                     height: 72px;
                     background-image:  url("@{base-url-path}/bg_carriage.png") ;
@@ -1281,9 +1287,6 @@ export default {
           position: absolute;
           bottom: 0;
           left: 0;
-          display: flex;
-          align-items: center;
-          padding: 16px;
           &.isEditStatus{
             z-index: 2001;
             height:223px ;
@@ -1296,8 +1299,22 @@ export default {
             top:17px;
             right: 15px;
           }
+          .train-item-opt{
+            width: 36px;
+            height:57px;
+            position: absolute;
+            right: 15px;
+            bottom: 83px;
+            z-index: 2000;
+            i{
+              font-size: 24px;
+            }
+          }
           .train-item-info{
-            width: 120px;
+            width: 128px;
+            position: absolute;
+            bottom: 80px;
+            right: 0;
             ul{
               li{
                 margin: 6px 0;
@@ -1321,17 +1338,11 @@ export default {
               }
             }
           }
-          .train-item-opt{
-            width: 36px;
-            height: 90px;
-            position: relative;
-            z-index: 2000;
-            i{
-              font-size: 24px;
-            }
-          }
 
           .train-item-name{
+            position: absolute;
+            bottom: 90px;
+            left: 66px;
             flex: 1;
             display: inline-flex;
             flex-direction: column;
