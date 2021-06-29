@@ -40,16 +40,22 @@
                   <div class="carriage-item"
                     :class="{
                       'f-left':cItem.location==='left',
-                      'f-right':cItem.location==='right'
+                      'f-right':cItem.location==='right',
+                      'isEditStatus':cItem.isEdit
                     }"
                     v-for="(cItem,cIndex) in item.containerInfo" :key="cIndex">
+                    <div class="carriage-edit-save" v-if="cItem.isEdit">
+                       <el-button  type="primary" >保存</el-button>
+                     </div>
                     <div
                     class="carriage-item-wrapper"
                     :class="{
                       'error':cItem.containerStatus===0
                       }"
                      >
+
                      <template v-if="cItem.containerNum">
+
                       <div class="carriage-item-wrapper-content">
                         <p>集装箱编号</p>
                         <div>
@@ -62,7 +68,7 @@
                           >
                         </div>
                       </div>
-                      <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex">
+                      <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex&&!cItem.isEdit">
                         <i class="h-icon-edit" @click.stop="editCarriage(item,index,cItem,cIndex)"></i>
                         <i class="h-icon-delete" @click.stop="deleteCarriage(index,cIndex)"></i>
                       </div>
@@ -256,6 +262,9 @@
         </div>
 
         </div>
+      </div>
+      <div class="train-bottom">
+
       </div>
     </div>
   </div>
@@ -1032,16 +1041,25 @@ export default {
 }
 .train-box{
   height: 365px;
-  padding-top: 80px;
   width:1200px;
   border: 3px solid #000;
+  position: relative;
   // display: flex;
   // align-items: flex-end;
+  .train-bottom{
+    width: 100%;
+    height: 12px;
+    background: #5E5E5E;
+    position: absolute;
+    bottom: 23px;
+    left: 0;
+  }
+
   .train-top{
     float: left;
     width: 300px;
     height:@train-top-height;
-    margin-top: 100px;
+    margin-top: 150px;
     .imgStyle();
     background-image: url("@{base-url-path}/train-top.png");
     &.f-right{
@@ -1074,11 +1092,11 @@ export default {
       height: 100%;
       width: 100%;
       height: 100%;
-      overflow: auto;
+      overflow-x: auto;
+      overflow-y: hidden;
       .train-list{
         display: inline-flex;
-        // align-items: center;
-        // justify-content: flex-start;
+        margin-top: 95px;
 
       }
       .flex-row{
@@ -1101,16 +1119,15 @@ export default {
           &:first-child{
             padding-right: calc(~ '@{train-box-add-width} + 2px');
           }
-
         }
       }
     }
     //操作区域
     .train-opt-box{
       width: 516px;
-      height: calc(~"100% - 30px");
       // border: 1px solid red;
       position: relative;
+      top:90px;
       .add-flex-row{
         flex-direction: row;
       }
@@ -1280,49 +1297,82 @@ export default {
         .carriage-box{
           // border: 2px solid #000;
           // height: 70px;
-          width: 100%;
-          overflow: hidden;
-          padding: 12px 16px 0 16px;
+          height: 83px;
+          width:@train-box-width;
+          // overflow: hidden;
+          // padding: 12px 16px 0 16px;
           position: absolute;
           top:0;
           left: 0;
           z-index: 200;
           &.float-row{
             .carriage-item{
+
+              &.isEditStatus{
+
+                &:first-child{
+                  left: 0;
+                }
+                &:nth-child(2){
+                  right: 0;
+                }
+              }
               &:first-child{
-                float: left;
+                left: 16px;
               }
               &:nth-child(2){
-                float: right;
+                right: 16px;
               }
             }
           }
           &.float-row-reverse{
             .carriage-item{
+              &.isEditStatus{
+
+                &:first-child{
+                  right: 0;
+                }
+                &:nth-child(2){
+                  left: 0;
+                }
+              }
               &:first-child{
-                float: right;
+                right: 16px;
               }
               &:nth-child(2){
-                float: left;
+                left: 16px;
               }
             }
           }
           .f-right{
-            float: right !important;
+            right: 16px !important;
           }
           .f-left{
-            float: left !important;
+            left: 16px !important;
           }
           .carriage-item{
-            // border: 1px solid yellow;
-            width: 136px;
-            height: 72px;
-
+            position: absolute;
+            bottom: 0;
+            .carriage-edit-save{
+              margin: 7px 7px 4px 57px;
+            }
+            &.isEditStatus{
+              width: 160px;
+              height: 130px;
+              background-image: url("@{base-url-path}/carriage_select_bg.png");
+              top:-20px;
+              .carriage-item-wrapper{
+                width: 146px;
+                height: 78px;
+                margin: 0 7px 9px 7px;
+              }
+            }
             .carriage-item-wrapper{
               background-image: url("@{base-url-path}/bg_carriage.png");
+              .imgStyle();
               color: rgba(0, 0, 0, .4);
-              width: 100%;
-              height: 100%;
+              width: 136px;
+              height: 72px;
               display: flex;
               &.error{
                  background-image: url("@{base-url-path}/bg_carriage_error.png") !important;
@@ -1340,9 +1390,10 @@ export default {
               }
               .carriage-item-wrapper-content{
                 flex: 1;
-                padding: 12px 0 12px 12px;
+                padding: 12px 0;
                 p{
-                  width: 70px;
+                  width: 100%;
+                  text-align: center;
                   height: 20px;
                   font-size: 14px;
                   color: rgba(0,0,0,0.40);
@@ -1353,9 +1404,10 @@ export default {
                 }
                 div{
                   span{
-                    width: 90px;
+                    width:100%;
+                    display: inline-block;
+                    text-align: center;
                     height: 20px;
-                    font-family: YOUSHEhaoshenti;
                     font-size: 14px;
                     color: rgba(0,0,0,0.70);
                     letter-spacing: 0;
@@ -1380,10 +1432,18 @@ export default {
                 }
               }
               input{
-                width: 100%;
-                min-width: 30px;
-                height: 30px;
+                width: 134px;
+                height: 18px;
+                background: #FFFFFF;
+border: 1px solid #333333;
+border-radius: 2px;
                 display: inline-block;
+                font-size: 14px;
+                color: rgba(0,0,0,0.70);
+                letter-spacing: 0;
+                text-align: center;
+                line-height: 20px;
+                font-weight: 400;
               }
 
             }
