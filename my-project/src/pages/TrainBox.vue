@@ -15,7 +15,7 @@
       </el-row>
 
     </div>
-    <div >
+    <div class="train-component-box">
       <Train
       :trainDirection="trainDirection"
       :needActiveTrainIndex="Number(needActiveTrainIndex)"
@@ -123,6 +123,10 @@ export default {
 }
 </script>
 
-<style>
-
+<style >
+.train-component-box{
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
 </style>

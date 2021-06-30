@@ -22,6 +22,7 @@
             }"
             >
             <li class="train-item-box"
+             @click.stop="fnclickTrainBox(index)"
             v-for="(item,index) in trainListData" :key="index"
             :class="{
               'C70':item.trainType==='C70',
@@ -74,7 +75,8 @@
                       </div>
                      </template>
                      <template v-else>
-                       <div class="empty-carriage-box">
+                       <template v-if="index===curActiveTrainIndex">
+                        <div class="empty-carriage-box">
 
                           <el-popover
                             :ref="'carriagePopover'+cIndex+'&'+index"
@@ -99,7 +101,13 @@
                             </div>
                             <el-button slot="reference">+</el-button>
                           </el-popover>
-                       </div>
+                        </div>
+                       </template>
+                       <template v-else>
+                        <div class="empty-carriage-box">
+                          禁用的+空集装箱
+                        </div>
+                       </template>
 
                      </template>
 
@@ -107,7 +115,7 @@
                   </div>
                 </div>
                 <div class="train-item-content"
-                @click.stop="fnclickTrainBox(index)"
+
                 :class="{
                   'isEditStatus':item.isEdit===true,
                   'error':item.trainStatus===0
