@@ -779,6 +779,9 @@ export default {
       }
       const addIndex = this.curActiveTrainIndex + index
       if (this.trainListData[addIndex] && this.trainListData[addIndex].trainType === '') { // 如果当前车厢是有集装箱的空车厢,直接替换
+        if (this.trainListData[addIndex].containerInfo.length === 1) {
+          this.trainListData[addIndex].containerInfo.push(this.newCarriageData)
+        }
         const ndata = Object.assign(trainItemData, {
           containerInfo: this.trainListData[addIndex].containerInfo
         })
@@ -829,24 +832,38 @@ export default {
         isEdit: 0,
         selfWeight: this.trainForm.selfWeight,
         loadWeight: this.trainForm.loadWeight,
-        containerInfo: []
+        containerInfo: [this.newCarriageData, this.newCarriageData]
       }
       const cloneTrainData = JSON.parse(JSON.stringify(this.trainListData))
 
-      for (let i = index; i < cloneTrainData.length; i++) {
-        if (i === index && cloneTrainData[index] && cloneTrainData[index].containerInfo && cloneTrainData[index].containerInfo.length > 0) {
-          const addData = Object.assign(trainItemData, {
-            containerInfo: cloneTrainData[index].containerInfo
-          })
-          cloneTrainData.splice(index, 0, addData)
+      for (let i = index; i <= this.trainListData.length; i++) {
+        // 如果新增加的车厢后面为篷车或者罐车
+
+        if (i === index) {
+          let addData = {}
+          if (cloneTrainData[i] && cloneTrainData[i].containerInfo && cloneTrainData[i].containerInfo.length > 0) {
+            if (cloneTrainData[i].containerInfo.length === 1) {
+              cloneTrainData[i].containerInfo.push(this.newCarriageData)
+            }
+            addData = Object.assign(trainItemData, {
+              containerInfo: cloneTrainData[i].containerInfo
+            })
+          } else {
+            addData = trainItemData
+          }
+
+          cloneTrainData.splice(i, 0, addData)
           continue
         }
         // 正常无篷车和罐车场景
         if (cloneTrainData[i + 1] && cloneTrainData[i + 1].containerInfo && cloneTrainData[i + 1].containerInfo.length > 0) {
+          if (cloneTrainData[i + 1].containerInfo.length === 1) {
+            cloneTrainData[i + 1].containerInfo.push(this.newCarriageData)
+          }
           const ldata = cloneTrainData[i + 1].containerInfo
           cloneTrainData[i].containerInfo = ldata
         } else {
-          cloneTrainData[i].containerInfo = []// 最后面的边界置空
+          cloneTrainData[i].containerInfo = [this.newCarriageData, this.newCarriageData]// 最后面的边界置空
           if (cloneTrainData[i].trainType === '') { // 如果最后个车厢为空车厢且集装箱为空则删除
             cloneTrainData.splice(i, 1)
           }
