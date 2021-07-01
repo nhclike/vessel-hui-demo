@@ -37,11 +37,10 @@
                 <div class="carriage-box"  :class="{
                         'float-row':trainDirection===0,
                         'float-row-reverse':trainDirection===1
-                      }" v-if="item.containerInfo">
+                      }" v-if="item&&item.containerInfo">
                   <div class="carriage-item"
                     :class="{
-                      'f-left':cItem.location==='left',
-                      'f-right':cItem.location==='right',
+
                       'isEditStatus':cItem.isEdit
                     }"
                     v-for="(cItem,cIndex) in item.containerInfo" :key="cIndex">
@@ -1062,17 +1061,30 @@ export default {
     },
     // 删除空集装箱
     deleteEmptyCarriage (index, cIndex) {
+      const _this = this
       this.$confirm('此操作将永久删除该集装箱, 是否继续?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         onConfirm: () => {
+          const cloneTrainData = JSON.parse(JSON.stringify(this.trainListData))
           // 此操作导致所有集装箱前移
-
-          this.$message({
+          for (let i = index; i < this.trainListData.length - 1; i++) {
+            if (cIndex === 0) {
+              cloneTrainData[i].containerInfo[0] = cloneTrainData[i].containerInfo[1]
+            }
+            if (!cloneTrainData[i + 1].containerInfo[1]) {
+              cloneTrainData[i + 1].containerInfo[1] = _this.newCarriageData
+              break
+            }
+            cloneTrainData[i].containerInfo[1] = cloneTrainData[i + 1].containerInfo[0]
+            cloneTrainData[i + 1].containerInfo[0] = cloneTrainData[i + 1].containerInfo[1]
+          }
+          _this.trainListData = cloneTrainData
+          _this.$message({
             type: 'success',
             message: '删除成功!'
           })
-          this.$emit('emitDeleteCarriage', this.trainListData)
+          _this.$emit('emitDeleteCarriage', this.trainListData)
         },
         onCancel: () => {
           this.$message({
