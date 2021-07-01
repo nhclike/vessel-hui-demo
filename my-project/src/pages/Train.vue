@@ -798,9 +798,9 @@ export default {
           this.trainListData.splice(index, 1)
           const _this = this
           if (this.trainDirection === 0) {
-            this.$nextTick(() => {
-              _this.curActiveTrainIndex = index
-            })
+            // this.$nextTick(() => {
+            //   _this.curActiveTrainIndex = index
+            // })
           } else {
             this.$nextTick(() => {
               const sl = _this.rowReverseScrollLeft(index)
