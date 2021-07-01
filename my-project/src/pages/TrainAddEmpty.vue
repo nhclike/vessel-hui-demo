@@ -192,7 +192,9 @@
           'f-left':trainDirection===0,
           'f-right':trainDirection===1
         }">
-        <div class="add-carriage-box" :class="{
+        <div class="add-carriage-box"
+        v-if="isShowAddCarriage"
+         :class="{
           'add-flex-row':trainDirection===0,
           'add-flex-row-reverse':trainDirection===1
         }">
@@ -214,7 +216,7 @@
           </div>
           <div class="add-carriage-item">
             <div class="add-carriage-wrapper"
-            :class="[isShowAddCarriage?'show':'hide']"
+            :class="[isShowLastAddCarriage?'show':'hide']"
              @click.stop="addCarriage(false,0)">
 
              <p>添加箱</p>
@@ -335,7 +337,8 @@ export default {
       lastBlockBoxStyle: {
         paddingLeft: '200px'
       },
-      trainListData: [], // 正常车箱列表数据
+      initTrainListData: [], // 设备上报的车厢列表数据
+      trainListData: [], // 融合了有集装箱无车厢的异常上报数据的车厢列表数据及页面渲染的数据
       errorCarriageListData: [], // 错误集装箱列表数据，储存有集装箱没有车厢的错误集装箱
       scrollLeft: 0,
       isCanClick: true,
@@ -405,14 +408,27 @@ export default {
       }
     },
     isShowPrevAddCarriage () {
-      return this.trainListData[this.curActiveTrainIndex].trainType !== 'P70'
+      const lc = this.getRealTrainLastCarriage()
+      if (lc.containerNum !== '') {
+        return false
+      }
+      return true
+    },
+    isShowLastAddCarriage () {
+      if (this.curActiveTrainIndex === this.trainListData.length - 1) { // 最后一个是否向后添加集装箱按钮处理
+        return false
+      }
+      if (this.trainListData[this.curActiveTrainIndex + 1] && this.trainListData[this.curActiveTrainIndex + 1].trainType === '') {
+        return false
+      }
+      const lc = this.getRealTrainLastCarriage()
+      if (lc.containerNum !== '') {
+        return false
+      }
+      return true
     },
     isShowAddCarriage () {
-      if (this.curActiveTrainIndex === this.trainListData.length - 1) { // 最后一个是否向后添加集装箱按钮处理
-        return true
-      } else {
-        return this.trainListData[Number(this.curActiveTrainIndex) + 1].trainType !== 'P70'
-      }
+      return this.trainListData[this.curActiveTrainIndex].trainType === 'NX70' || this.trainListData[this.curActiveTrainIndex].trainType === 'C70'
     }
   },
   watch: {
@@ -465,163 +481,164 @@ export default {
         isEdit: 0
       }
     ]
-    const trainListData = [{
-      id: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
-      trainStatus: 1,
-      trainType: 'NX70',
-      trainNo: '第1节平车',
-      isEdit: 0,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      containerInfo: [
-        {
-          trainContentId: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
-          id: '1111111111',
-          containerStatus: 0, //   0异常1正常
-          containerNum: '第1集装箱',
-          visible: false,
-          isEdit: 0
-        },
-        {
-          trainContentId: '',
-          id: '',
-          containerStatus: 1, //   0异常1正常
-          containerNum: '',
-          visible: false,
-          isEdit: 0
-        }
-      ]
-    },
-    // {
-    //   trainStatus: 1, //  0异常1正常
-    //   trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
-    //   trainNo: '第2节棚车',
-    //   isEdit: 0,
-    //   selfWeight: '1t',
-    //   loadWeight: '1t',
-    //   containerInfo: [
+    const trainListData = [
+      {
+        id: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
+        trainStatus: 1,
+        trainType: 'NX70',
+        trainNo: '第1节平车',
+        isEdit: 0,
+        selfWeight: '1t',
+        loadWeight: '1t',
+        containerInfo: [
+          {
+            trainContentId: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',
+            id: '1111111111',
+            containerStatus: 0, //   0异常1正常
+            containerNum: '第1集装箱',
+            visible: false,
+            isEdit: 0
+          },
+          {
+            trainContentId: '',
+            id: '',
+            containerStatus: 1, //   0异常1正常
+            containerNum: '',
+            visible: false,
+            isEdit: 0
+          }
+        ]
+      },
+      // {
+      //   trainStatus: 1, //  0异常1正常
+      //   trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
+      //   trainNo: '第2节棚车',
+      //   isEdit: 0,
+      //   selfWeight: '1t',
+      //   loadWeight: '1t',
+      //   containerInfo: [
 
-    //   ]// 如果一个数据没有上报为[]
-    // },
-    // {
-    //   trainStatus: 0, // 0异常1正常
-    //   trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
-    //   trainNo: '第2节棚车',
-    //   isEdit: 0,
-    //   selfWeight: '1t',
-    //   loadWeight: '1t',
-    //   containerInfo: []// 如果一个数据没有上报为[]
-    // },
-    {
-      id: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
-      trainStatus: 0,
-      trainType: 'C70',
-      trainNo: '第4节敞车',
-      isEdit: 0,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      containerInfo: [
-        {
-          trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
-          id: '2222222222',
-          containerStatus: 1,
-          containerNum: '第2集装箱',
-          visible: false,
-          isEdit: 0
-        },
-        {
-          trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
-          id: '3333333333',
-          containerStatus: 1,
-          containerNum: '第3集装箱',
-          visible: false,
-          isEdit: 0
-        }
-      ]
-    },
-    {
-      id: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+      //   ]// 如果一个数据没有上报为[]
+      // },
+      // {
+      //   trainStatus: 0, // 0异常1正常
+      //   trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
+      //   trainNo: '第2节棚车',
+      //   isEdit: 0,
+      //   selfWeight: '1t',
+      //   loadWeight: '1t',
+      //   containerInfo: []// 如果一个数据没有上报为[]
+      // },
+      {
+        id: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
+        trainStatus: 0,
+        trainType: 'C70',
+        trainNo: '第4节敞车',
+        isEdit: 0,
+        selfWeight: '1t',
+        loadWeight: '1t',
+        containerInfo: [
+          {
+            trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
+            id: '2222222222',
+            containerStatus: 1,
+            containerNum: '第2集装箱',
+            visible: false,
+            isEdit: 0
+          },
+          {
+            trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
+            id: '3333333333',
+            containerStatus: 1,
+            containerNum: '第3集装箱',
+            visible: false,
+            isEdit: 0
+          }
+        ]
+      },
+      {
+        id: 'fd5ab9cd-4901-4789-9d38-046be897f690',
 
-      trainStatus: 1,
-      trainType: 'C70',
-      trainNo: '第5节敞车',
-      isEdit: 0,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      containerInfo: [
-        {
-          trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
-          id: '4444444444',
-          containerStatus: 1,
-          containerNum: '第4集装箱',
-          visible: false,
-          isEdit: 0
-        },
-        {
-          trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
-          id: '5555555555',
-          containerStatus: 1,
-          containerNum: '第5集装箱',
-          isEdit: 0,
-          visible: false
-        }
-      ]
-    },
-    {
-      trainStatus: 0,
-      trainType: 'NX70',
-      trainNo: '第6节平车',
-      isEdit: 0,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      containerInfo: [
-        {
-          trainContentId: '',
-          id: '',
-          containerStatus: 1, //   0异常1正常
-          containerNum: '',
-          visible: false,
-          isEdit: 0
-        },
-        {
-          trainContentId: '',
-          id: '',
-          containerStatus: 1, //   0异常1正常
-          containerNum: '',
-          visible: false,
-          isEdit: 0
-        }
-      ]
-    },
-    {
-      id: '75a7a546-b3ba-4800-97fc-819b2367743a',
+        trainStatus: 1,
+        trainType: 'C70',
+        trainNo: '第5节敞车',
+        isEdit: 0,
+        selfWeight: '1t',
+        loadWeight: '1t',
+        containerInfo: [
+          {
+            trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+            id: '4444444444',
+            containerStatus: 1,
+            containerNum: '第4集装箱',
+            visible: false,
+            isEdit: 0
+          },
+          {
+            trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
+            id: '5555555555',
+            containerStatus: 1,
+            containerNum: '第5集装箱',
+            isEdit: 0,
+            visible: false
+          }
+        ]
+      },
+      {
+        trainStatus: 0,
+        trainType: 'NX70',
+        trainNo: '第6节平车',
+        isEdit: 0,
+        selfWeight: '1t',
+        loadWeight: '1t',
+        containerInfo: [
+          {
+            trainContentId: '',
+            id: '',
+            containerStatus: 1, //   0异常1正常
+            containerNum: '',
+            visible: false,
+            isEdit: 0
+          },
+          {
+            trainContentId: '',
+            id: '',
+            containerStatus: 1, //   0异常1正常
+            containerNum: '',
+            visible: false,
+            isEdit: 0
+          }
+        ]
+      },
+      {
+        id: '75a7a546-b3ba-4800-97fc-819b2367743a',
 
-      trainStatus: 1,
-      trainType: 'NX70',
-      trainNo: '第7节平车',
-      isEdit: 0,
-      selfWeight: '1t',
-      loadWeight: '1t',
-      containerInfo: [
-        {
-          trainContentId: '75a7a546-b3ba-4800-97fc-819b2367743a',
-          id: '6666666666',
-          containerStatus: 1,
-          containerNum: '第6集装箱',
-          visible: false,
-          isEdit: 0
-        },
-        {
-          trainContentId: '',
-          id: '',
-          containerStatus: 1, //   0异常1正常
-          containerNum: '',
-          visible: false,
-          isEdit: 0
-        }
-      ]
-    }]
-
+        trainStatus: 1,
+        trainType: 'NX70',
+        trainNo: '第7节蓬车',
+        isEdit: 0,
+        selfWeight: '1t',
+        loadWeight: '1t',
+        containerInfo: [
+          {
+            trainContentId: '75a7a546-b3ba-4800-97fc-819b2367743a',
+            id: '6666666666',
+            containerStatus: 1,
+            containerNum: '第6集装箱',
+            visible: false,
+            isEdit: 0
+          },
+          {
+            trainContentId: '',
+            id: '',
+            containerStatus: 1, //   0异常1正常
+            containerNum: '',
+            visible: false,
+            isEdit: 0
+          }
+        ]
+      }]
+    this.initTrainListData = JSON.parse(JSON.stringify(trainListData))
     // 重组异常数据
     for (let i = 0; i < Math.ceil(this.errorCarriageListData.length / 2); i++) {
       const gid = this.guid()
@@ -687,6 +704,16 @@ export default {
     },
     guid () {
       return Number(Math.random().toString().substr(3, 3) + Date.now()).toString(36)
+    },
+    getRealTrainLastCarriage () {
+      let lastCarriage
+      for (let i = this.trainListData.length - 1; i >= 0; i--) {
+        if (this.trainListData[i].trainType !== '') {
+          lastCarriage = this.trainListData[i].containerInfo[1]
+          break
+        }
+      }
+      return lastCarriage
     },
     fnInputBlur (item) {
       // console.log(item)
@@ -1153,7 +1180,7 @@ export default {
     //操作区域
     .train-opt-box{
       width: 516px;
-      // border: 1px solid red;
+      height: @train-box-height;
       position: relative;
       top:90px;
       .add-flex-row{
@@ -1219,6 +1246,8 @@ export default {
         // border: 1px solid red;
         display: flex;
         justify-content: space-between;
+        position: absolute;
+        bottom: 22px;
         .add-train-item{
 
           height:154px;
