@@ -970,7 +970,13 @@ export default {
         // 第一个添加
         if (index === 0) {
           this.fnAddCarriage(this.curActiveTrainIndex)
+        } else {
+          const ldata = this.trainListData[this.curActiveTrainIndex].containerInfo[1]
+          this.trainListData[this.curActiveTrainIndex].containerInfo[1] = this.newCarriageData
+          this.fnAddCarriage(this.curActiveTrainIndex + 1, ldata)
         }
+      } else {
+        this.fnAddCarriage(this.curActiveTrainIndex + 1)
       }
     },
     // 模拟触发第三个增加集装箱事件
@@ -986,43 +992,23 @@ export default {
     // 从每个车厢的第一个集装箱处开始添加集装箱
     fnAddCarriage (startLocation, addData) { // addData决定首位添加的是空数据还是前一个车厢的最后一个集装箱数据
       const recordTrainData = []
-      // const _this = this
-      // let firstOpt = startLocation
-      for (let i = startLocation; i <= this.trainListData.length; i++) {
-        if (!this.trainListData[i] || this.trainListData[i].trainType === '') {
-          this.$confirm('此操作将产生无车厢的集装箱, 请先添加车厢再添加集装箱?', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            onConfirm: () => {
+      const cloneTrainData = JSON.parse(JSON.stringify(this.trainListData))
+      for (let i = startLocation; i < cloneTrainData.length; i++) {
+        // 思路
+        // 1取出第一个集装箱保存
+        // 2第一个集装箱存放；如果是第一个操作车厢则放空值,否则放上个车厢最后一个值
+        // 3第二个集装箱放值之前先取出记录保存，再给第二个集装箱放之前保存的第一个集装箱
 
-            },
-            onCancel: () => {
-              this.$message({
-                type: 'success',
-                message: '已取消删除!'
-              })
-            }
-          })
-
-          break
+        recordTrainData[0] = cloneTrainData[i].containerInfo[0]
+        if (i === startLocation) {
+          cloneTrainData[i].containerInfo[0] = addData || Object.assign({}, this.newCarriageData)
+        } else {
+          cloneTrainData[i].containerInfo[0] = recordTrainData[1]
         }
-
-        if (this.trainListData[i].containerInfo.length === 2) {
-          // 思路
-          // 1取出第一个集装箱保存
-          // 2第一个集装箱存放；如果是第一个操作车厢则放空值,否则放上个车厢最后一个值
-          // 3第二个集装箱放值之前先取出记录保存，再给第二个集装箱放之前保存的第一个集装箱
-
-          recordTrainData[0] = this.trainListData[i].containerInfo[0]
-          if (i === startLocation) {
-            this.trainListData[i].containerInfo[0] = addData || Object.assign({}, this.newCarriageData)
-          } else {
-            this.trainListData[i].containerInfo[0] = recordTrainData[1]
-          }
-          recordTrainData[1] = this.trainListData[i].containerInfo[1]
-          this.trainListData[i].containerInfo[1] = recordTrainData[0]
-        }
+        recordTrainData[1] = cloneTrainData[i].containerInfo[1]
+        cloneTrainData[i].containerInfo[1] = recordTrainData[0]
       }
+      this.trainListData = cloneTrainData
     },
     // 编辑集装箱
     editCarriage (item, index, cItem, cIndex) {
@@ -1068,16 +1054,32 @@ export default {
         onConfirm: () => {
           const cloneTrainData = JSON.parse(JSON.stringify(this.trainListData))
           // 此操作导致所有集装箱前移
-          for (let i = index; i < this.trainListData.length - 1; i++) {
+          for (let i = index; i < cloneTrainData.length; i++) {
             if (cIndex === 0) {
               cloneTrainData[i].containerInfo[0] = cloneTrainData[i].containerInfo[1]
             }
-            if (!cloneTrainData[i + 1].containerInfo[1]) {
-              cloneTrainData[i + 1].containerInfo[1] = _this.newCarriageData
+
+            if (cloneTrainData[i + 1] && cloneTrainData[i + 1].containerInfo[0]) {
+              cloneTrainData[i].containerInfo[1] = cloneTrainData[i + 1].containerInfo[0]
+            } else {
+              if (cloneTrainData[i].trainType === '') {
+                cloneTrainData[i].containerInfo.splice(1, 1)
+              } else {
+                cloneTrainData[i].containerInfo[1] = _this.newCarriageData
+              }
+
               break
             }
-            cloneTrainData[i].containerInfo[1] = cloneTrainData[i + 1].containerInfo[0]
-            cloneTrainData[i + 1].containerInfo[0] = cloneTrainData[i + 1].containerInfo[1]
+
+            if (cloneTrainData[i + 1] && cloneTrainData[i + 1].containerInfo[1]) {
+              cloneTrainData[i + 1].containerInfo[0] = cloneTrainData[i + 1].containerInfo[1]
+            } else {
+              if (cloneTrainData[i + 1].trainType === '') {
+                cloneTrainData.splice(i + 1, 1)
+              }
+
+              break
+            }
           }
           _this.trainListData = cloneTrainData
           _this.$message({
@@ -1123,7 +1125,7 @@ export default {
 }
 .train-box{
   height: 365px;
-  width:1200px;
+  width:1600px;
   border: 3px solid #000;
   position: relative;
   // display: flex;
