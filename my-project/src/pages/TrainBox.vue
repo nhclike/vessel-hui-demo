@@ -15,7 +15,7 @@
       </el-row>
 
     </div>
-    <div class="train-component-box">
+    <!-- <div class="train-component-box">
       <Train
       :trainDirection="trainDirection"
       :needActiveTrainIndex="Number(needActiveTrainIndex)"
@@ -27,14 +27,27 @@
        ref="trainBox">
        </Train>
 
-    </div>
+    </div> -->
+    <div class="train-component-box">
+      <train-add-empty
+      :trainDirection="trainDirection"
+      :needActiveTrainIndex="Number(needActiveTrainIndex)"
+       @emitCurActiveTrainIndex="emitCurActiveTrainIndex"
+       @emitDeleteTrainBox="emitDeleteTrainBox"
+       @emitAddTrainBox="emitAddTrainBox"
+       @emitAddCarriage="emitAddCarriage"
+       @emitDeleteCarriage="emitDeleteCarriage"
+       ref="trainBox">
+       </train-add-empty>
 
+    </div>
   </div>
 </template>
 
 <script>
 
 import Train from './Train.vue'
+import TrainAddEmpty from './TrainAddEmpty.vue'
 
 export default {
   data () {
@@ -47,7 +60,8 @@ export default {
     }
   },
   components: {
-    Train
+    Train,
+    TrainAddEmpty
   },
   computed: {
 
