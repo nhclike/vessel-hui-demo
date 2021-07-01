@@ -412,6 +412,10 @@ export default {
       if (lc.containerNum !== '') {
         return false
       }
+      const la = this.getErrorTrainIndex()
+      if (la > -1) {
+        return false
+      }
       return true
     },
     isShowLastAddCarriage () {
@@ -421,8 +425,12 @@ export default {
       if (this.trainListData[this.curActiveTrainIndex + 1] && this.trainListData[this.curActiveTrainIndex + 1].trainType === '') {
         return false
       }
-      const lc = this.getRealTrainLastCarriage()
+      const lc = this.getRealTrainLastCarriage()// 最后一个正常的车厢上最后一个集装箱是否为空态
       if (lc.containerNum !== '') {
+        return false
+      }
+      const la = this.getErrorTrainIndex()// 存在落空的集装箱
+      if (la > -1) {
         return false
       }
       return true
@@ -715,6 +723,16 @@ export default {
       }
       return lastCarriage
     },
+    getErrorTrainIndex () {
+      let lastErrorIndex = -1
+      for (let i = this.trainListData.length - 1; i >= 0; i--) {
+        if (this.trainListData[i].trainType === '') {
+          lastErrorIndex = i
+          break
+        }
+      }
+      return lastErrorIndex
+    },
     fnInputBlur (item) {
       // console.log(item)
       item.isEdit = 0
@@ -902,7 +920,7 @@ export default {
     },
     // 删除车厢
     deleteTrainBox (index) {
-      this.$confirm('此操作将永久删除该车厢, 是否继续?', {
+      this.$confirm('删除车厢某某某？\n 车厢上的集装箱将同时被删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         onConfirm: () => {
@@ -989,9 +1007,6 @@ export default {
 
           break
         }
-        if (!this.trainListData[i] && recordTrainData[1].containerNum === '') {
-
-        }
 
         if (this.trainListData[i].containerInfo.length === 2) {
           // 思路
@@ -1024,7 +1039,7 @@ export default {
     },
     // 删除集装箱
     deleteCarriage (index, cIndex) {
-      this.$confirm('此操作将永久删除该集装箱, 是否继续?', {
+      this.$confirm('此操作将删除该集装箱数据, 是否继续?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         onConfirm: () => {
