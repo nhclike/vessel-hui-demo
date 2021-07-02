@@ -322,12 +322,12 @@ const TRAINBOXWIDTH = 464
 export default {
   props: {
     trainDirection: {
-      trainType: Number,
+      type: Number,
       default: 0// 0正向从右向左/1反向从左到右
     },
     // 需要激活的火车车厢
     needActiveTrainIndex: {
-      trainType: Number,
+      type: Number,
       default: 0
     }
   },
@@ -1124,7 +1124,7 @@ export default {
   }
 }
 .train-box{
-  height: 365px;
+  height: 310px;
   width:1600px;
   border: 3px solid #000;
   position: relative;
@@ -1143,7 +1143,7 @@ export default {
     float: left;
     width: 300px;
     height:@train-top-height;
-    margin-top: 150px;
+    margin-top: 90px;
     .imgStyle();
     background-image: url("@{base-url-path}/train-top.png");
     &.f-right{
@@ -1180,7 +1180,7 @@ export default {
       overflow-y: hidden;
       .train-list{
         display: inline-flex;
-        margin-top: 95px;
+        margin-top: 40px;
 
       }
       .flex-row{
@@ -1211,7 +1211,7 @@ export default {
       width: 516px;
       height: @train-box-height;
       position: relative;
-      top:90px;
+      top:35px;
       .add-flex-row{
         flex-direction: row;
       }
