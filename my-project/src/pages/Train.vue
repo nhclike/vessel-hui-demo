@@ -42,10 +42,10 @@
                     :class="{
                       'f-left':cItem.location==='left',
                       'f-right':cItem.location==='right',
-                      'isEditStatus':cItem.isEdit
+                      'isEditStatus':cItem.edit
                     }"
                     v-for="(cItem,cIndex) in item.containerInfo" :key="cIndex">
-                    <div class="carriage-edit-save" v-if="cItem.isEdit">
+                    <div class="carriage-edit-save" v-if="cItem.edit">
                        <el-button  type="primary" >保存</el-button>
                      </div>
                     <div
@@ -60,16 +60,16 @@
                       <div class="carriage-item-wrapper-content">
                         <p>集装箱编号</p>
                         <div>
-                          <span v-if="index!=curActiveTrainIndex||!cItem.isEdit">{{cItem.containerNum}}</span>
+                          <span v-if="index!=curActiveTrainIndex||!cItem.edit">{{cItem.containerNum}}</span>
                           <input type="text"
                           v-focus="true"
-                          v-if="index===curActiveTrainIndex&&cItem.isEdit"
+                          v-if="index===curActiveTrainIndex&&cItem.edit"
                           @blur="fnInputBlur(cItem)"
                           v-model="cItem.containerNum"
                           >
                         </div>
                       </div>
-                      <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex&&!cItem.isEdit">
+                      <div class="carriage-item-wrapper-opt" v-if="index===curActiveTrainIndex&&!cItem.edit">
                         <i class="h-icon-edit" @click.stop="editCarriage(item,index,cItem,cIndex)"></i>
                         <i class="h-icon-delete" @click.stop="deleteCarriage(index,cIndex)"></i>
                       </div>
@@ -117,20 +117,20 @@
                 <div class="train-item-content"
 
                 :class="{
-                  'isEditStatus':item.isEdit===true,
+                  'isEditStatus':item.edit===true,
                   'error':item.trainStatus===0
                   }"
                  v-if="item.trainType">
                   <div class="train-item-save">
-                    <el-button type="primary" v-if="item.isEdit" @click.stop="fnSaveEditTrainBoxData(item)">保存</el-button>
+                    <el-button type="primary" v-if="item.edit" @click.stop="fnSaveEditTrainBoxData(item)">保存</el-button>
                   </div>
                   <div class="train-item-content-wrapper">
                     <div class="train-item-name" v-if="item.trainNo">
                       <div>火车编号</div>
                       <div>
-                        <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainNo}}</span>
+                        <span v-if="index!=curActiveTrainIndex||!item.edit">{{item.trainNo}}</span>
                         <input v-focus="true"
-                          v-if="index===curActiveTrainIndex&&item.isEdit"
+                          v-if="index===curActiveTrainIndex&&item.edit"
 
                           type="text"
                           v-model="item.trainNo">
@@ -141,27 +141,27 @@
                       <ul>
                         <li>
                           <span>类型</span>
-                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.trainType}}</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.edit">{{item.trainType}}</span>
                           <input
-                            v-if="index===curActiveTrainIndex&&item.isEdit"
+                            v-if="index===curActiveTrainIndex&&item.edit"
 
                             type="text"
                             v-model="item.trainType">
                         </li>
                         <li>
                           <span>自重</span>
-                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.selfWeight}}</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.edit">{{item.selfWeight}}</span>
                           <input
-                            v-if="index===curActiveTrainIndex&&item.isEdit"
+                            v-if="index===curActiveTrainIndex&&item.edit"
 
                             type="text"
                             v-model="item.selfWeight">
                         </li>
                         <li>
                           <span>载重</span>
-                          <span v-if="index!=curActiveTrainIndex||!item.isEdit">{{item.loadWeight}}</span>
+                          <span v-if="index!=curActiveTrainIndex||!item.edit">{{item.loadWeight}}</span>
                           <input
-                            v-if="index===curActiveTrainIndex&&item.isEdit"
+                            v-if="index===curActiveTrainIndex&&item.edit"
 
                             type="text"
                             v-model="item.loadWeight">
@@ -169,7 +169,7 @@
                       </ul>
                     </div>
 
-                    <div class="train-item-opt" v-if="index===curActiveTrainIndex&&!item.isEdit">
+                    <div class="train-item-opt" v-if="index===curActiveTrainIndex&&!item.edit">
                       <i class="h-icon-edit" @click.stop="editTrainBox(item,index)"></i>
                       <i class="h-icon-delete" @click.stop="deleteTrainBox(index)"></i>
                     </div>
@@ -365,7 +365,7 @@ export default {
         containerStatus: 1, // 集装箱containerStatus字段；1上报的异常集装箱；2正常上报的集装箱
         containerNum: '',
         visible: false,
-        isEdit: 0
+        edit: 0
       }
 
     }
@@ -443,7 +443,7 @@ export default {
         containerStatus: 0, //   0异常1正常
         containerNum: '第8集装箱',
         visible: false,
-        isEdit: 0
+        edit: 0
       },
       {
         trainContentId: -1,
@@ -451,7 +451,7 @@ export default {
         containerStatus: 0, //   0异常1正常
         containerNum: '第9集装箱',
         visible: false,
-        isEdit: 0
+        edit: 0
       },
       {
         trainContentId: -1,
@@ -459,7 +459,7 @@ export default {
         containerStatus: 0, //   0异常1正常
         containerNum: '第a集装箱',
         visible: false,
-        isEdit: 0
+        edit: 0
       }
     ]
     const trainListData = [{
@@ -467,7 +467,7 @@ export default {
       trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第1节平车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
@@ -477,7 +477,7 @@ export default {
           containerStatus: 0, //   0异常1正常
           containerNum: '第1集装箱',
           visible: false,
-          isEdit: 0
+          edit: 0
         }
       ]
     },
@@ -485,7 +485,7 @@ export default {
       trainStatus: 1, //  0异常1正常
       trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
       trainNo: '第2节棚车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: []// 如果一个数据没有上报为[]
@@ -494,7 +494,7 @@ export default {
       trainStatus: 0, // 0异常1正常
       trainType: 'P70', // type为''为有集装箱无车厢数据的异常数据
       trainNo: '第2节棚车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: []// 如果一个数据没有上报为[]
@@ -504,7 +504,7 @@ export default {
       trainStatus: 0,
       trainType: 'C70',
       trainNo: '第4节敞车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
@@ -514,7 +514,7 @@ export default {
           containerStatus: 1,
           containerNum: '第2集装箱',
           visible: false,
-          isEdit: 0
+          edit: 0
         },
         {
           trainContentId: '46ebb00f-2f27-4eaa-b3da-3782e543b9a3',
@@ -522,7 +522,7 @@ export default {
           containerStatus: 1,
           containerNum: '第3集装箱',
           visible: false,
-          isEdit: 0
+          edit: 0
         }
       ]
     },
@@ -532,7 +532,7 @@ export default {
       trainStatus: 1,
       trainType: 'C70',
       trainNo: '第5节敞车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
@@ -542,14 +542,14 @@ export default {
           containerStatus: 1,
           containerNum: '第4集装箱',
           visible: false,
-          isEdit: 0
+          edit: 0
         },
         {
           trainContentId: 'fd5ab9cd-4901-4789-9d38-046be897f690',
           id: '5555555555',
           containerStatus: 1,
           containerNum: '第5集装箱',
-          isEdit: 0,
+          edit: 0,
           visible: false
         }
       ]
@@ -558,7 +558,7 @@ export default {
       trainStatus: 0,
       trainType: 'NX70',
       trainNo: '第6节平车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: []
@@ -569,7 +569,7 @@ export default {
       trainStatus: 1,
       trainType: 'NX70',
       trainNo: '第7节平车',
-      isEdit: 0,
+      edit: 0,
       selfWeight: '1t',
       loadWeight: '1t',
       containerInfo: [
@@ -579,7 +579,7 @@ export default {
           containerStatus: 1,
           containerNum: '第6集装箱',
           visible: false,
-          isEdit: 0
+          edit: 0
         }
       ]
     }]
@@ -594,7 +594,7 @@ export default {
         trainStatus: 0,
         trainType: '',
         trainNo: '',
-        isEdit: 0,
+        edit: 0,
         selfWeight: '',
         loadWeight: '',
         containerInfo: []
@@ -652,17 +652,17 @@ export default {
     },
     fnInputBlur (item) {
       // console.log(item)
-      item.isEdit = 0
+      item.edit = 0
     },
     // 编辑车厢
     editTrainBox (item, index) {
       console.log('editTrainBox', item)
-      item.isEdit = true
+      item.edit = true
     },
     // 保存车厢编辑数据
     fnSaveEditTrainBoxData (item) {
       // 此处添加接口保存编辑数据
-      item.isEdit = false
+      item.edit = false
     },
     // 选中那个车厢激活那个车厢
     fnclickTrainBox (index) {
@@ -734,7 +734,7 @@ export default {
         trainStatus: 1,
         trainType: this.trainForm.trainType,
         trainNo: this.trainForm.trainNum,
-        isEdit: 0,
+        edit: 0,
         selfWeight: this.trainForm.selfWeight,
         loadWeight: this.trainForm.loadWeight,
         containerInfo: []
@@ -964,7 +964,7 @@ export default {
               //   trainStatus: 1,
               //   trainType: '', // 错误状态的车厢（无车厢type）
               //   trainNo: '',
-              //   isEdit: 0,
+              //   edit: 0,
               //   containerInfo: [recordTrainData[1] ? recordTrainData[1] : Object.assign({}, this.newCarriageData)]// 最后一个车厢直接在最后面添加集装箱边界值处理
               // })
               // if (this.trainDirection === 1) { // 反向导致车厢增加需要位置矫正
@@ -1030,7 +1030,7 @@ export default {
         this.isCanClick = false
         setTimeout(function () {
           console.log('editCarriage', cItem)
-          cItem.isEdit = true
+          cItem.edit = true
           _this.isCanClick = true
         }, 500)
       }
