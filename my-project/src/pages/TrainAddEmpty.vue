@@ -22,6 +22,7 @@
             }"
             >
             <li class="train-item-box"
+            :id="'train-item-box-'+index"
              @click.stop="fnclickTrainBox(index)"
             v-for="(item,index) in trainListData" :key="index"
             :class="{
@@ -285,6 +286,7 @@
 
 <script>
 import { debounce } from '@/utils/utils'
+import $ from 'jquery'
 
 // 整体交互设计
 // 1通过改变scrollLeft动态计算当前激活车厢
@@ -319,6 +321,7 @@ import { debounce } from '@/utils/utils'
 // 4.3判断车厢是否存在
 // 4.3.1不存在则新增type为空的新车厢，并且将上个车厢的最后一个集装箱数据添加进来
 const TRAINBOXWIDTH = 464
+
 export default {
   props: {
     trainDirection: {
@@ -479,6 +482,33 @@ export default {
       }
     },
     curActiveTrainIndex (newVal, oldVal) {
+      if (!this.$refs.trainBody) {
+        return false
+      }
+      for (let i = 0; i <= this.trainListData.length - 1; i++) {
+        if (this.trainDirection === 0) {
+          $(`#train-item-box-${i}`).removeClass('animate__animated animate__fadeInRight')
+        } else {
+          $(`#train-item-box-${i}`).removeClass('animate__animated animate__fadeInLeft')
+        }
+
+        const leftOffset = $(`#train-item-box-${i}`)[0].getBoundingClientRect()
+        console.log(`#train-item-box-${i}`, leftOffset)
+        const totalOffset = this.$refs.trainBody.getBoundingClientRect()
+        const clientWidth = this.$refs.trainBody.clientWidth
+        const inter = leftOffset.left - totalOffset.left
+        console.log('totalOffset', totalOffset, 'clientWidth', clientWidth, 'inter', inter)
+
+        if (this.trainDirection === 0) {
+          if (inter > 0 && inter < clientWidth) {
+            $(`#train-item-box-${i}`).addClass('animate__animated animate__fadeInRight')
+          }
+        } else {
+          if (inter > -TRAINBOXWIDTH && inter < clientWidth + TRAINBOXWIDTH) {
+            $(`#train-item-box-${i}`).addClass('animate__animated animate__fadeInLeft')
+          }
+        }
+      }
       this.$emit('emitCurActiveTrainIndex', newVal)
     },
     needActiveTrainIndex (newVal, oldVal) {
@@ -487,32 +517,32 @@ export default {
   },
   mounted () {
     // console.log(this.$refs.trainOptBox, this.$refs.trainOptBox.clientWidth)
-    this.errorCarriageListData = [
-      {
-        trainContentId: -1,
-        id: '8888888888',
-        containerStatus: 0, //   0异常1正常
-        containerNum: '第8集装箱',
-        visible: false,
-        edit: 0
-      },
-      {
-        trainContentId: -1,
-        id: '9999999999',
-        containerStatus: 0, //   0异常1正常
-        containerNum: '第9集装箱',
-        visible: false,
-        edit: 0
-      },
-      {
-        trainContentId: -1,
-        id: 'aaaaaaaaaa',
-        containerStatus: 0, //   0异常1正常
-        containerNum: '第a集装箱',
-        visible: false,
-        edit: 0
-      }
-    ]
+    // this.errorCarriageListData = [
+    //   {
+    //     trainContentId: -1,
+    //     id: '8888888888',
+    //     containerStatus: 0, //   0异常1正常
+    //     containerNum: '第8集装箱',
+    //     visible: false,
+    //     edit: 0
+    //   },
+    //   {
+    //     trainContentId: -1,
+    //     id: '9999999999',
+    //     containerStatus: 0, //   0异常1正常
+    //     containerNum: '第9集装箱',
+    //     visible: false,
+    //     edit: 0
+    //   },
+    //   {
+    //     trainContentId: -1,
+    //     id: 'aaaaaaaaaa',
+    //     containerStatus: 0, //   0异常1正常
+    //     containerNum: '第a集装箱',
+    //     visible: false,
+    //     edit: 0
+    //   }
+    // ]
     const trainListData = [
       {
         id: 'd465d15a-dfdf-4929-bd67-9dc19a0d58f7',

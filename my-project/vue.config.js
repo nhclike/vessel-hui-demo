@@ -1,5 +1,5 @@
 const isProd = process.env.NODE_ENV === 'production'
-
+const webpack = require('webpack')
 /** @type {import('@vue/cli-service').ProjectOptions} */
 module.exports = {
   publicPath: `/${process.env.VUE_APP_CONTEXT}`,
@@ -26,6 +26,12 @@ module.exports = {
     /@hui-pro/
   ],
   chainWebpack: (config) => {
+    config.plugin('provide').use(webpack.ProvidePlugin, [{
+      $: 'jquery',
+      jquery: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery'
+    }])
     if (isProd) {
       // 打包的css如有必要加上@charset
       config.plugin('optimize-css').tap(args => {
@@ -38,6 +44,7 @@ module.exports = {
       })
     }
   },
+
   // 用于开发环境下与后端联调
   // 如有需要, 还可以配合easy-proxy进行使用
   devServer: {
